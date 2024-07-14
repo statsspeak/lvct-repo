@@ -8,7 +8,7 @@ import { sendEmail } from "@/lib/email";
 
 export async function getUsers() {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || (session.user as any).role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
@@ -30,7 +30,7 @@ export async function getUsers() {
 
 export async function createUser(formData: FormData) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || (session.user as any).role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
@@ -76,7 +76,7 @@ export async function createUser(formData: FormData) {
 
 export async function updateUserRole(formData: FormData) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || (session.user as any).role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
@@ -103,7 +103,7 @@ export async function updateUserRole(formData: FormData) {
 
 export async function deleteUser(formData: FormData) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || (session.user as any).role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
@@ -122,7 +122,7 @@ export async function deleteUser(formData: FormData) {
 
 export async function inviteUser(formData: FormData) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || (session.user as any).role !== "ADMIN") {
     return { error: "Unauthorized" };
   }
 
