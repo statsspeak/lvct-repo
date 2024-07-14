@@ -1,23 +1,27 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import React from 'react'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { createUser } from '../app/actions/users';
+import React from 'react';
 
-export function CreateUserForm({ createUser }) {
-    const [message, setMessage] = useState('')
-    const [error, setError] = useState('')
+export function CreateUserForm() {
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const router = useRouter();
 
     async function handleSubmit(formData: FormData) {
-        const result = await createUser(formData)
+        const result = await createUser(formData);
         if (result.error) {
-            setError(result.error)
-            setMessage('')
+            setError(result.error);
+            setMessage('');
         } else {
-            setMessage('User created successfully')
-            setError('')
+            setMessage('User created successfully');
+            setError('');
+            router.refresh(); // Refresh the page after creating the user
         }
     }
 
@@ -44,5 +48,5 @@ export function CreateUserForm({ createUser }) {
             {message && <p className="text-green-500">{message}</p>}
             {error && <p className="text-red-500">{error}</p>}
         </form>
-    )
+    );
 }

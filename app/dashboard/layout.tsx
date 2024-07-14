@@ -56,12 +56,12 @@ export default async function DashboardLayout({
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/dashboard/invite-user" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                <Link href="/dashboard/admin/invite-user" className="block py-2 px-4 hover:bg-gray-100 rounded">
                                     Invite User
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/dashboard/users" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                <Link href="/dashboard/admin/users" className="block py-2 px-4 hover:bg-gray-100 rounded">
                                     Manage Users
                                 </Link>
                             </li>

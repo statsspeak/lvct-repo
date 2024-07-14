@@ -1,5 +1,5 @@
 import { getAuditLogs } from "@/app/actions/admin"
-import { Button } from "@/components/ui/button"
+import { PaginationButtons } from "@/components/PaginationButtons"
 
 export default async function AuditLogs({
     searchParams
@@ -36,21 +36,7 @@ export default async function AuditLogs({
                     ))}
                 </tbody>
             </table>
-            <div className="mt-4 flex justify-between">
-                <Button
-                    disabled={currentPage <= 1}
-                    onClick={() => window.location.href = `?page=${currentPage - 1}`}
-                >
-                    Previous
-                </Button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <Button
-                    disabled={currentPage >= totalPages}
-                    onClick={() => window.location.href = `?page=${currentPage + 1}`}
-                >
-                    Next
-                </Button>
-            </div>
+            <PaginationButtons currentPage={currentPage} totalPages={totalPages} />
         </div>
     )
 }

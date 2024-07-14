@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { updateUserRole } from '@/app/actions/users';
 
 interface UserRoleSelectProps {
@@ -9,11 +10,14 @@ interface UserRoleSelectProps {
 }
 
 const UserRoleSelect: React.FC<UserRoleSelectProps> = ({ userId, currentRole }) => {
+    const router = useRouter();
+
     const handleRoleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const formData = new FormData();
         formData.append('userId', userId);
         formData.append('role', e.target.value);
         await updateUserRole(formData);
+        router.refresh(); // Refresh the page after updating the role
     };
 
     return (

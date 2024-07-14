@@ -1,34 +1,41 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import React from 'react'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import React from 'react';
 
 export function PatientForm({ patient, updatePatient }) {
+    const initialDateOfBirth = typeof patient.dateOfBirth === 'string'
+        ? patient.dateOfBirth.split('T')[0]
+        : patient.dateOfBirth instanceof Date
+            ? patient.dateOfBirth.toISOString().split('T')[0]
+            : '';
+
     const [formData, setFormData] = useState({
         firstName: patient.firstName,
         lastName: patient.lastName,
-        dateOfBirth: patient.dateOfBirth.split('T')[0],
+        dateOfBirth: initialDateOfBirth,
         email: patient.email || '',
         phone: patient.phone || '',
-    })
-    const [error, setError] = useState<string | null>(null)
-    const router = useRouter()
+    });
+
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-        setFormData({ ...formData, [e.target.name]: e.target.value })
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     }
 
     async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault()
-        const result = await updatePatient(patient.id, formData)
+        e.preventDefault();
+        const result = await updatePatient(patient.id, formData);
         if (result.error) {
-            setError(typeof result.error === 'string' ? result.error : 'Failed to update patient')
+            setError(typeof result.error === 'string' ? result.error : 'Failed to update patient');
         } else {
-            router.push('/dashboard/patients')
+            router.push('/dashboard/patients');
         }
     }
 
@@ -88,5 +95,5 @@ export function PatientForm({ patient, updatePatient }) {
             </div>
             <Button type="submit">Update Patient</Button>
         </form>
-    )
+    );
 }

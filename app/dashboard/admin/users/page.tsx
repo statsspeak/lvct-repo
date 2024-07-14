@@ -1,6 +1,7 @@
-import { getUsers, createUser, updateUserRole, deleteUser } from '../../../actions/users'
+import { getUsers, deleteUser } from '../../../../app/actions/users'
 import { Button } from '../../../../components/ui/button'
 import { CreateUserForm } from '../../../../components/CreateUserForm'
+import UserRoleSelect from '../../../../components/UserRoleSelect'
 import React from 'react'
 
 export default async function Users() {
@@ -13,7 +14,7 @@ export default async function Users() {
     return (
         <div>
             <h1 className="text-2xl font-bold mb-4">Manage Users</h1>
-            <CreateUserForm createUser={createUser} />
+            {/* <CreateUserForm /> */}
             <table className="min-w-full bg-white mt-4">
                 <thead>
                     <tr>
@@ -29,20 +30,7 @@ export default async function Users() {
                             <td className="py-2 px-4 border-b">{user.name}</td>
                             <td className="py-2 px-4 border-b">{user.email}</td>
                             <td className="py-2 px-4 border-b">
-                                <form action={updateUserRole}>
-                                    <input type="hidden" name="userId" value={user.id} />
-                                    <select
-                                        name="role"
-                                        defaultValue={user.role}
-                                        className="p-1 border rounded"
-                                        onChange={(e) => e.target.form?.requestSubmit()}
-                                    >
-                                        <option value="ADMIN">Admin</option>
-                                        <option value="STAFF">Staff</option>
-                                        <option value="LAB_TECHNICIAN">Lab Technician</option>
-                                        <option value="CALL_CENTER_AGENT">Call Center Agent</option>
-                                    </select>
-                                </form>
+                                <UserRoleSelect userId={user.id} currentRole={user.role} />
                             </td>
                             <td className="py-2 px-4 border-b">
                                 <form action={deleteUser}>
