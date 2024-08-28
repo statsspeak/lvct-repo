@@ -29,7 +29,7 @@ export default async function DashboardLayout({
                             Profile
                         </Link>
                     </li>
-                    {(session.user as any).role === 'STAFF' && (
+                    {['STAFF'].includes((session.user as any).role) && (
                         <>
                             <li>
                                 <Link href="/dashboard/register-patient" className="block py-2 px-4 hover:bg-gray-100 rounded">
@@ -41,35 +41,21 @@ export default async function DashboardLayout({
                                     Patients
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/dashboard/lab" className="block py-2 px-4 hover:bg-gray-100 rounded">
-                                    Lab
-                                </Link>
-                            </li>
                         </>
                     )}
-                    {(session.user as any).role === 'LAB_TECHNICIAN' && (
-                        <>
-                            <li>
-                                <Link href="/dashboard/lab" className="block py-2 px-4 hover:bg-gray-100 rounded">
-                                    Lab
-                                </Link>
-                            </li>
-                        </>
+                    {['STAFF', 'LAB_TECHNICIAN'].includes((session.user as any).role) && (
+                        <li>
+                            <Link href="/dashboard/lab" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                Lab
+                            </Link>
+                        </li>
                     )}
                     {(session.user as any).role === 'CALL_CENTER_AGENT' && (
-                        <>
-                            <li>
-                                <Link href="/dashboard/patients" className="block py-2 px-4 hover:bg-gray-100 rounded">
-                                    Patients
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/dashboard/register-patient" className="block py-2 px-4 hover:bg-gray-100 rounded">
-                                    Register Patient
-                                </Link>
-                            </li>
-                        </>
+                        <li>
+                            <Link href="/dashboard/communications" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                Communications
+                            </Link>
+                        </li>
                     )}
                     {(session.user as any).role === 'ADMIN' && (
                         <>
@@ -99,7 +85,6 @@ export default async function DashboardLayout({
                         <SignOutButton />
                     </li>
                 </ul>
-
             </nav>
             <main className="flex-1 p-8 overflow-y-auto">
                 {children}

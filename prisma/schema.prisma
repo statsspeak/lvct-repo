@@ -18,13 +18,26 @@ model User {
   resetTokenExpiry DateTime?
   failedAttempts   Int       @default(0)
   lockedUntil      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   testsCreated       Test[]
-  testsUpdated       Test[]     @relation("TestUpdates")
+  testsUpdated       Test[]          @relation("TestUpdates")
   auditLogs          AuditLog[]
   patientsRegistered Patient[]
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  communications     Communication[]
+}
+
+enum CommunicationMethod {
+  PHONE
+  EMAIL
+  SMS
+}
+
+enum CommunicationOutcome {
+  SUCCESSFUL
+  UNSUCCESSFUL
+  NO_ANSWER
 }
 
 model AuditLog {
@@ -37,25 +50,26 @@ model AuditLog {
 }
 
 model Patient {
-  id            String   @id @default(cuid())
-  firstName     String
-  lastName      String
-  dateOfBirth   DateTime
-  email         String?
-  phone         String?
-  consentForm   String?
-  qrCode        String
-  createdBy     String
-  createdByUser User     @relation(fields: [createdBy], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  tests         Test[]
+  id             String          @id @default(cuid())
+  firstName      String
+  lastName       String
+  dateOfBirth    DateTime
+  email          String?
+  phone          String?
+  consentForm    String?
+  qrCode         String
+  createdBy      String
+  createdByUser  User            @relation(fields: [createdBy], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  tests          Test[]
+  communications Communication[]
 }
 
 model Test {
-  id             String     @id @default(cuid())
+  id             String          @id @default(cuid())
   patientId      String
-  patient        Patient    @relation(fields: [patientId], references: [id])
+  patient        Patient         @relation(fields: [patientId], references: [id])
   status         TestStatus
   collectionDate DateTime
   receivedDate   DateTime?
@@ -64,11 +78,28 @@ model Test {
   result         String?
   notes          String?
   createdBy      String
-  createdByUser  User       @relation(fields: [createdBy], references: [id])
+  createdByUser  User            @relation(fields: [createdBy], references: [id])
   updatedBy      String?
-  updatedByUser  User?      @relation("TestUpdates", fields: [updatedBy], references: [id])
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  updatedByUser  User?           @relation("TestUpdates", fields: [updatedBy], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  communications Communication[]
+}
+
+model Communication {
+  id                 String               @id @default(cuid())
+  patientId          String
+  patient            Patient              @relation(fields: [patientId], references: [id])
+  testId             String
+  test               Test                 @relation(fields: [testId], references: [id])
+  method             CommunicationMethod
+  outcome            CommunicationOutcome
+  notes              String?
+  followUpDate       DateTime?
+  communicatedBy     String
+  communicatedByUser User                 @relation(fields: [communicatedBy], references: [id])
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 }
 
 enum TestStatus {
