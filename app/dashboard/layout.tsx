@@ -32,6 +32,34 @@ export default async function DashboardLayout({
                     {(session.user as any).role === 'STAFF' && (
                         <>
                             <li>
+                                <Link href="/dashboard/register-patient" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                    Register Patient
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/dashboard/patients" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                    Patients
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/dashboard/lab" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                    Lab
+                                </Link>
+                            </li>
+                        </>
+                    )}
+                    {(session.user as any).role === 'LAB_TECHNICIAN' && (
+                        <>
+                            <li>
+                                <Link href="/dashboard/lab" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                    Lab
+                                </Link>
+                            </li>
+                        </>
+                    )}
+                    {(session.user as any).role === 'CALL_CENTER_AGENT' && (
+                        <>
+                            <li>
                                 <Link href="/dashboard/patients" className="block py-2 px-4 hover:bg-gray-100 rounded">
                                     Patients
                                 </Link>

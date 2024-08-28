@@ -48,7 +48,7 @@ export default function Login() {
 
     return (
         <div className="flex min-h-screen items-center justify-center">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md p-8 bg-white                                                                                    shadow-lg rounded-lg">
                 <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
                 {error && <p className="text-red-500 text-center">{error}</p>}
                 <div>
