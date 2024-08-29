@@ -29,6 +29,14 @@ export default async function DashboardLayout({
                             Profile
                         </Link>
                     </li>
+
+                    {['ADMIN', 'STAFF'].includes((session.user as any).role) && (
+                        <li>
+                            <Link href="/dashboard/analytics" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                Analytics
+                            </Link>
+                        </li>
+                    )}
                     {['STAFF'].includes((session.user as any).role) && (
                         <>
                             <li>

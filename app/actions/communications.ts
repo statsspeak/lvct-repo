@@ -265,8 +265,14 @@ export async function getUpcomingFollowUps() {
 
 export async function getCommunicationStats() {
   const session = await auth();
-  if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
+  if (!session) {
     return { error: "Unauthorized" };
+  }
+
+  // Check if the user has the necessary role to access analytics
+  const allowedRoles = ["ADMIN", "CALL_CENTER_AGENT"];
+  if (!allowedRoles.includes((session.user as any).role)) {
+    return { error: "You do not have permission to access this data" };
   }
 
   try {
