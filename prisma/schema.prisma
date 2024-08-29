@@ -117,3 +117,13 @@ enum Role {
   LAB_TECHNICIAN
   CALL_CENTER_AGENT
 }
+
+model CommunicationLog {
+  id           String   @id @default(cuid())
+  method       String
+  recipient    String
+  content      String
+  status       String
+  errorMessage String?
+  createdAt    DateTime @default(now())
+}

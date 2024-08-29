@@ -51,11 +51,19 @@ export default async function DashboardLayout({
                         </li>
                     )}
                     {(session.user as any).role === 'CALL_CENTER_AGENT' && (
-                        <li>
-                            <Link href="/dashboard/communications" className="block py-2 px-4 hover:bg-gray-100 rounded">
-                                Communications
-                            </Link>
-                        </li>
+                        <>
+                            <li>
+                                <Link href="/dashboard/communications" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                    Communications
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/dashboard/communications/stats" className="block py-2 px-4 hover:bg-gray-100 rounded">
+                                    Stats
+                                </Link>
+                            </li>
+                        </>
+
                     )}
                     {(session.user as any).role === 'ADMIN' && (
                         <>

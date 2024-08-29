@@ -229,3 +229,111 @@ export async function getPatientDetails(patientId: string) {
     return { error: "Failed to fetch patient details" };
   }
 }
+
+export async function getUpcomingFollowUps() {
+  const session = await auth();
+  if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const followUps = await prisma.communication.findMany({
+      where: {
+        followUpDate: {
+          gte: new Date(),
+        },
+      },
+      include: {
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        followUpDate: "asc",
+      },
+    });
+
+    return { followUps };
+  } catch (error) {
+    console.error("Failed to fetch upcoming follow-ups:", error);
+    return { error: "Failed to fetch upcoming follow-ups" };
+  }
+}
+
+export async function getCommunicationStats() {
+  const session = await auth();
+  if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    // Get total number of communications
+    const totalCommunications = await prisma.communication.count();
+
+    // Get number of successful communications
+    const successfulCommunications = await prisma.communication.count({
+      where: { outcome: CommunicationOutcome.SUCCESSFUL },
+    });
+
+    // Get number of pending follow-ups
+    const pendingFollowUps = await prisma.communication.count({
+      where: {
+        followUpDate: { gte: new Date() },
+      },
+    });
+
+    // Get communications by method
+    const communicationsByMethod = await prisma.communication.groupBy({
+      by: ["method"],
+      _count: {
+        _all: true,
+      },
+    });
+
+    // Get communications by outcome
+    const communicationsByOutcome = await prisma.communication.groupBy({
+      by: ["outcome"],
+      _count: {
+        _all: true,
+      },
+    });
+
+    // Get communications over time (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const communicationsOverTime = await prisma.communication.groupBy({
+      by: ["createdAt"],
+      where: {
+        createdAt: { gte: sevenDaysAgo },
+      },
+      _count: {
+        _all: true,
+      },
+    });
+
+    return {
+      stats: {
+        totalCommunications,
+        successfulCommunications,
+        pendingFollowUps,
+        communicationsByMethod: communicationsByMethod.map((item) => ({
+          method: item.method,
+          count: item._count._all,
+        })),
+        communicationsByOutcome: communicationsByOutcome.map((item) => ({
+          outcome: item.outcome,
+          count: item._count._all,
+        })),
+        communicationsOverTime: communicationsOverTime.map((item) => ({
+          date: item.createdAt,
+          count: item._count._all,
+        })),
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch communication stats:", error);
+    return { error: "Failed to fetch communication stats" };
+  }
+}
