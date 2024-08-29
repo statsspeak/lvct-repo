@@ -1,19 +1,16 @@
-// lib/sms.ts
-
+import africastalking from "./atClient";
 import { prisma } from "./prisma";
-import twilio from "twilio";
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+export async function sendSMS(to: string, message: string) {
+  if (!process.env.AT_SENDER_ID) {
+    throw new Error("Missing Africa's Talking Sender ID");
+  }
 
-export async function sendSMS(to: string, body: string) {
   try {
-    const result = await client.messages.create({
-      body,
+    const result = await africastalking.SMS.send({
       to,
-      from: process.env.TWILIO_PHONE_NUMBER,
+      message,
+      from: process.env.AT_SENDER_ID,
     });
 
     // Log the successful SMS in the database
@@ -21,15 +18,17 @@ export async function sendSMS(to: string, body: string) {
       data: {
         method: "SMS",
         recipient: to,
-        content: body,
+        content: message,
         status: "SUCCESS",
-        errorMessage: null,
+        externalId: result.Recipients.messageId,
       },
     });
 
-    console.log(`SMS sent successfully. SID: ${result.sid}`);
-    return { success: true, message: "SMS sent successfully", sid: result.sid };
-  } catch (error) {
+    return {
+      success: true,
+      messageId: result.Recipients.messageId,
+    };
+  } catch (error: unknown) {
     console.error("Failed to send SMS:", error);
 
     // Log the failed SMS attempt in the database
@@ -37,15 +36,15 @@ export async function sendSMS(to: string, body: string) {
       data: {
         method: "SMS",
         recipient: to,
-        content: body,
+        content: message,
         status: "FAILED",
         errorMessage: error instanceof Error ? error.message : String(error),
+        externalId: "",
       },
     });
 
     return {
       success: false,
-      message: "Failed to send SMS",
       error: error instanceof Error ? error.message : String(error),
     };
   }

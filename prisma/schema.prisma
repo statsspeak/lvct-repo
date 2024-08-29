@@ -125,5 +125,6 @@ model CommunicationLog {
   content      String
   status       String
   errorMessage String?
+  externalId   String
   createdAt    DateTime @default(now())
 }

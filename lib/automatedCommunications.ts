@@ -9,7 +9,7 @@ export function startAutomatedCommunications() {
         where: {
           followUpDate: {
             gte: new Date(),
-            lt: new Date(Date.now() + 60 * 60 * 1000),
+            lt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
           },
           method: "SMS",
         },
@@ -43,8 +43,8 @@ export function startAutomatedCommunications() {
           data: {
             outcome: result.success ? "SUCCESSFUL" : "UNSUCCESSFUL",
             notes: result.success
-              ? `Automated SMS sent successfully. SID: ${result.sid}`
-              : `Failed to send automated SMS: ${result.message}`,
+              ? `Automated SMS sent successfully. Message ID: ${result.messageId}`
+              : `Failed to send automated SMS: ${result.error}`,
           },
         });
       }
