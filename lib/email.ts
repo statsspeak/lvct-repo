@@ -33,6 +33,7 @@ export async function sendEmail(payload: EmailPayload) {
       text,
       html,
     });
+    
     console.log(`Email sent: ${info.messageId}`);
     return info;
   } catch (error) {
