@@ -64,7 +64,7 @@ export default function RegisterPatient() {
         return (
             <div className="mt-4">
                 <h2 className="text-xl font-bold mb-2">Patient Registered Successfully</h2>
-                <p>Please print the QR code and attach it to the patient's test kit.</p>
+                <p>Please print the QR code and attach it to the patient&apos;s test kit.</p>
                 <Image src={qrCode} alt="Patient QR Code" width={200} height={200} />
                 <Button onClick={() => window.print()} className="mt-2">Print QR Code</Button>
                 <Button onClick={() => router.push('/dashboard/patients')} className="mt-2 ml-2">Back to Patients</Button>

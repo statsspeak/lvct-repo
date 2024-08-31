@@ -5,7 +5,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 
-export function InviteUserForm({ inviteUser }) {
+export function InviteUserForm({ inviteUser }: { inviteUser: (formData: FormData) => Promise<{ error?: string }> }) {
     const [message, setMessage] = useState('')
     const [error, setError] = useState('')
 

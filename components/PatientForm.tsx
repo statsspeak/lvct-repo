@@ -7,9 +7,23 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import React from 'react';
 
-export function PatientForm({ patient, updatePatient }) {
+interface Patient {
+    id: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string | Date;
+    email?: string | null;
+    phone?: string | null;
+    consentForm?: string | null;
+    qrCode?: string;
+    createdBy?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export function PatientForm({ patient, updatePatient }: { patient: Patient; updatePatient: (id: string, data: Partial<Patient>) => Promise<{ error?: string }> }) {
     const initialDateOfBirth = typeof patient.dateOfBirth === 'string'
-        ? patient.dateOfBirth.split('T')[0]
+        ? patient.dateOfBirth.split('T')[0] // Assuming it's an ISO string and we want the date part only
         : patient.dateOfBirth instanceof Date
             ? patient.dateOfBirth.toISOString().split('T')[0]
             : '';
@@ -33,7 +47,7 @@ export function PatientForm({ patient, updatePatient }) {
         e.preventDefault();
         const result = await updatePatient(patient.id, formData);
         if (result.error) {
-            setError(typeof result.error === 'string' ? result.error : 'Failed to update patient');
+            setError(result.error);
         } else {
             router.push('/dashboard/patients');
         }
