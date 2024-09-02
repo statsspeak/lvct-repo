@@ -1,55 +1,94 @@
-import React from 'react';
-import { getPatientCommunications, getPatientDetails } from '@/app/actions/communications';
-import { CommunicationList } from '@/components/CommunicationList';
-import { CommunicationForm } from '@/components/CommunicationForm';
-import { PatientDetails } from '@/components/PatientDetails';
-import { FollowUpList } from '@/components/FollowUpList';
+'use client';
 
-export default async function PatientCommunicationPage({ params }: { params: { patientId: string } }) {
-    const [communicationsResult, patientDetailsResult] = await Promise.all([
-        getPatientCommunications(params.patientId),
-        getPatientDetails(params.patientId)
-    ]);
+import React, { useEffect, useState } from 'react';
+import { getPatientsWithTests } from '@/app/actions/communications';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Pagination } from '@/components/Pagination';
+import { useSearchParams } from 'next/navigation';
+import { TestStatus } from '@prisma/client';
 
-    if ('error' in communicationsResult) {
-        console.error("Communications error:", communicationsResult.error);
-        return <div>Error: {communicationsResult.error}</div>;
-    }
+interface Patient {
+    id: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: Date;
+    email: string | null;
+    phone: string | null;
+    tests: Array<{
+        id: string;
+        status: TestStatus;
+        completedAt: Date | null;
+    }>;
+}
 
-    if ('error' in patientDetailsResult) {
-        console.error("Patient details error:", patientDetailsResult.error);
-        return <div>Error: {patientDetailsResult.error}</div>;
-    }
+interface PaginationData {
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+}
 
-    const { communications } = communicationsResult;
-    const { patient } = patientDetailsResult;
+export default function CommunicationsPage() {
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [pagination, setPagination] = useState<PaginationData>({ currentPage: 1, totalPages: 1, totalCount: 0 });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const followUps = communications.filter(comm => comm.followUpDate && new Date(comm.followUpDate) > new Date());
+    const searchParams = useSearchParams();
+    const page = Number(searchParams.get('page')) || 1;
+    const search = searchParams.get('search') || '';
+    const status = searchParams.get('status') as TestStatus | undefined;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            const result = await getPatientsWithTests(page, 10, status, search);
+            if ('error' in result) {
+                setError(result.error || null);
+            } else {
+                setPatients(result.patients);
+                setPagination(result.pagination);
+            }
+            setLoading(false);
+        };
+
+        fetchData();
+    }, [page, search, status]);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold">Patient Communications</h1>
-            <PatientDetails patient={patient} />
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <h2 className="text-2xl font-semibold mb-4">Record New Communication</h2>
-                    <CommunicationForm patientId={params.patientId} />
-                </div>
-                <div>
-                    <h2 className="text-2xl font-semibold mb-4">Upcoming Follow-ups</h2>
-                    <FollowUpList followUps={followUps} />
-                </div>
-            </div>
-            <div>
-                <h2 className="text-2xl font-semibold mb-4">Communication History</h2>
-                <CommunicationList communications={communications.map(comm => ({
-                    ...comm,
-                    communicatedByUser: {
-                        ...comm.communicatedByUser,
-                        name: comm.communicatedByUser.name || ''
-                    }
-                }))} />
-            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Patient Name</TableHead>
+                        <TableHead>Latest Test Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {patients.map((patient) => (
+                        <TableRow key={patient.id}>
+                            <TableCell>{`${patient.firstName} ${patient.lastName}`}</TableCell>
+                            <TableCell>{patient.tests[0]?.status || 'No tests'}</TableCell>
+                            <TableCell>
+                                <Link href={`/dashboard/communications/${patient.id}`}>
+                                    <Button variant="outline">View Communications</Button>
+                                </Link>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalCount={pagination.totalCount}
+            />
         </div>
     );
 }

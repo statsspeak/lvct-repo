@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -207,6 +207,10 @@ export async function getPatientDetails(patientId: string) {
   const session = await auth();
   if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
     return { error: "Unauthorized" };
+  }
+
+  if (!patientId) {
+    return { error: "Patient ID is required" };
   }
 
   try {

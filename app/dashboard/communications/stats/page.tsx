@@ -1,3 +1,4 @@
+import React from 'react';
 import { CommunicationDashboard } from '@/components/CommunicationDashboard';
 
 export default function CommunicationStatsPage() {
