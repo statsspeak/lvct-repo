@@ -1,3 +1,4 @@
+"use server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -18,13 +19,35 @@ const testSchema = z.object({
   notes: z.string().optional(),
 });
 
+export async function getPatients() {
+  try {
+    const patients = await prisma.patient.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    });
+
+    return patients.map((patient) => ({
+      id: patient.id,
+      name: `${patient.firstName} ${patient.lastName}`,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch patients:", error);
+    throw new Error("Failed to fetch patients");
+  }
+}
+
 export async function createTest(formData: FormData) {
   const session = await auth();
   if (
     !session ||
-    !["STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
+    !session.user ||
+    !session.user.id ||
+    (session.user as any).role !== "LAB_TECHNICIAN"
   ) {
-    return { error: "Unauthorized" };
+    return { error: "Unauthorized. Only lab technicians can create tests." };
   }
 
   const validatedFields = testSchema.safeParse({
@@ -41,13 +64,25 @@ export async function createTest(formData: FormData) {
   const { patientId, status, collectionDate, notes } = validatedFields.data;
 
   try {
+    // Verify that the patient exists
+    const patient = await prisma.patient.findUnique({
+      where: { id: patientId },
+    });
+
+    if (!patient) {
+      return {
+        error: "Invalid patient ID. Please check the QR code and try again.",
+      };
+    }
+
     const test = await prisma.test.create({
       data: {
         patientId,
         status,
         collectionDate: new Date(collectionDate),
         notes,
-        createdBy: (session.user as any).id,
+        createdBy: session.user.id,
+        receivedDate: status === "RECEIVED" ? new Date() : undefined,
       },
     });
 
@@ -55,7 +90,12 @@ export async function createTest(formData: FormData) {
     return { success: true, test };
   } catch (error) {
     console.error("Failed to create test:", error);
-    return { error: "Failed to create test" };
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        return { error: "A test for this patient already exists." };
+      }
+    }
+    return { error: "Failed to create test. Please try again." };
   }
 }
 
