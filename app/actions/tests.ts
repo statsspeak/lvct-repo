@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Prisma, TestStatus } from "@prisma/client";
+import { addNotification } from "@/lib/notifications";
 
 const testSchema = z.object({
   patientId: z.string().cuid(),
@@ -45,7 +46,8 @@ export async function createTest(formData: FormData) {
     !session ||
     !session.user ||
     !session.user.id ||
-    (session.user as any).role !== "LAB_TECHNICIAN"
+    (session.user as any).role !== "LAB_TECHNICIAN" ||
+    (session.user as any).role !== "STAFF"
   ) {
     return { error: "Unauthorized. Only lab technicians can create tests." };
   }
@@ -86,7 +88,19 @@ export async function createTest(formData: FormData) {
       },
     });
 
-    revalidatePath("/dashboard/lab");
+    // Add notification for staff members
+    const staffMembers = await prisma.user.findMany({
+      where: { role: "STAFF" },
+    });
+
+    for (const staff of staffMembers) {
+      await addNotification(
+        staff.id,
+        `New test created for patient ${patientId}`
+      );
+    }
+
+    revalidatePath("/dashboard/staff/tests");
     return { success: true, test };
   } catch (error) {
     console.error("Failed to create test:", error);
@@ -124,6 +138,12 @@ export async function updateTestStatus(formData: FormData) {
         ...(status === "COMPLETED" && { resultDate: new Date() }),
       },
     });
+
+    // Add notification for the patient
+    await addNotification(
+      test.patientId,
+      `Your test status has been updated to ${status}`
+    );
 
     revalidatePath("/dashboard/lab");
     return { success: true, test };

@@ -255,6 +255,11 @@ export async function getUpcomingFollowUps() {
             lastName: true,
           },
         },
+        test: {
+          select: {
+            status: true,
+          },
+        },
       },
       orderBy: {
         followUpDate: "asc",

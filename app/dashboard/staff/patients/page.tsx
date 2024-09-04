@@ -37,7 +37,7 @@ export default async function Patients({ searchParams }: { searchParams: { searc
                             <td className="py-2 px-4 border-b">{patient.email}</td>
                             <td className="py-2 px-4 border-b">{patient.phone}</td>
                             <td className="py-2 px-4 border-b">
-                                <Link href={`/dashboard/patients/${patient.id}`}>
+                                <Link href={`/dashboard/staff/patients/${patient.id}`}>
                                     <Button>View</Button>
                                 </Link>
                             </td>

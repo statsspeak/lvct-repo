@@ -1,50 +1,58 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getUpcomingFollowUps } from '@/app/actions/communications';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { $Enums } from '@prisma/client';
+import { ErrorMessage } from '@/components/ErrorMessage';
+import { Spinner } from '@/components/ui/spinner';
+import { CommunicationMethod, CommunicationOutcome } from '@prisma/client';
+import { getUpcomingFollowUps } from '@/app/actions/communications';
 
-// Define the FollowUp type based on the Prisma query structure
 type FollowUp = {
     id: string;
     patientId: string;
     testId: string;
-    method: $Enums.CommunicationMethod;
-    outcome: $Enums.CommunicationOutcome;
+    method: CommunicationMethod;
+    outcome: CommunicationOutcome;
+    notes: string | null;
     followUpDate: Date | null;
+    communicatedBy: string;
+    createdAt: Date;
     updatedAt: Date;
     patient: {
         firstName: string;
         lastName: string;
     };
+    test: {
+        status: string;
+    };
 };
 
 export function UpcomingFollowUps() {
-    const [followUps, setFollowUps] = useState<FollowUp[]>([]);
+    const [followUps, setFollowUps] = useState<FollowUp[] | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchFollowUps = async () => {
-            const result = await getUpcomingFollowUps();
-            if ('error' in result) {
-                setError(result.error || null);
-            } else {
-                setFollowUps(result.followUps);
+            try {
+                const result = await getUpcomingFollowUps();
+                if ('error' in result) {
+                    setError(result.error || 'An unknown error occurred');
+                } else {
+                    setFollowUps(result.followUps);
+                }
+            } catch (err) {
+                setError('Failed to load upcoming follow-ups');
             }
         };
         fetchFollowUps();
-
-        // Set up an interval to fetch follow-ups every 5 minutes
-        const intervalId = setInterval(fetchFollowUps, 5 * 60 * 1000);
+        const intervalId = setInterval(fetchFollowUps, 300000); // Refresh every 5 minutes
 
         return () => clearInterval(intervalId);
     }, []);
 
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
+    if (error) return <ErrorMessage message={error} />;
+    if (!followUps) return <Spinner />;
 
     return (
         <div>
@@ -55,6 +63,7 @@ export function UpcomingFollowUps() {
                         <TableHead>Patient</TableHead>
                         <TableHead>Follow-up Date</TableHead>
                         <TableHead>Method</TableHead>
+                        <TableHead>Test Status</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -64,8 +73,9 @@ export function UpcomingFollowUps() {
                             <TableCell>{`${followUp.patient.firstName} ${followUp.patient.lastName}`}</TableCell>
                             <TableCell>{followUp.followUpDate ? new Date(followUp.followUpDate).toLocaleString() : 'N/A'}</TableCell>
                             <TableCell>{followUp.method}</TableCell>
+                            <TableCell>{followUp.test.status}</TableCell>
                             <TableCell>
-                                <Button variant="outline" onClick={() => { /* Handle follow-up action */ }}>
+                                <Button variant="outline" onClick={() => handleContact(followUp)}>
                                     Contact
                                 </Button>
                             </TableCell>
@@ -75,4 +85,9 @@ export function UpcomingFollowUps() {
             </Table>
         </div>
     );
+}
+
+function handleContact(followUp: FollowUp) {
+    // Implement the contact action here
+    console.log('Contacting patient:', followUp.patientId);
 }

@@ -26,6 +26,8 @@ model User {
   auditLogs          AuditLog[]
   patientsRegistered Patient[]
   communications     Communication[]
+  preference         UserPreference?
+  notifications      Notification[]
 }
 
 enum CommunicationMethod {
@@ -127,4 +129,23 @@ model CommunicationLog {
   errorMessage String?
   externalId   String
   createdAt    DateTime @default(now())
+}
+
+model UserPreference {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  theme           String   @default("light")
+  dashboardLayout Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

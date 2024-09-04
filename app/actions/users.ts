@@ -191,3 +191,21 @@ export async function activateAccount(token: string, password: string) {
     return { error: "Failed to activate account" };
   }
 }
+
+export async function updateUserPreferences(preferences: { theme: string }) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated");
+  }
+
+  await prisma.userPreference.upsert({
+    where: { userId: session.user.id },
+    update: preferences,
+    create: {
+      userId: session.user.id,
+      ...preferences,
+    },
+  });
+
+  return { success: true };
+}

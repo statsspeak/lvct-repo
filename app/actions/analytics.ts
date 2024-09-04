@@ -34,7 +34,7 @@ export async function getAnalyticsOverview() {
 
 export async function getTestResultsAnalytics() {
   const session = await auth();
-  if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
+  if (!session || !["ADMIN", "STAFF","LAB_TECHNICIAN"].includes((session.user as any).role)) {
     return { error: "Unauthorized" };
   }
 
@@ -96,7 +96,7 @@ export async function getPatientDemographics() {
 
 export async function getTurnaroundTimeAnalytics() {
   const session = await auth();
-  if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
+  if (!session || !["ADMIN", "STAFF","LAB_TECHNICIAN"].includes((session.user as any).role)) {
     return { error: "Unauthorized" };
   }
 

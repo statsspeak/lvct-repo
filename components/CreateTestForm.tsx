@@ -41,7 +41,7 @@ export function CreateTestForm() {
     });
 
     useEffect(() => {
-        if (status === 'unauthenticated' || (session?.user as any)?.role !== 'LAB_TECHNICIAN') {
+        if ((status === 'unauthenticated' || ((session?.user as any)?.role !== 'LAB_TECHNICIAN') && (session?.user as any)?.role !== 'STAFF')) {
             router.push('/dashboard');
         }
     }, [status, session, router]);
