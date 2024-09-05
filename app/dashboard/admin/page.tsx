@@ -20,6 +20,17 @@ export default function AdminDashboard() {
                 </Card>
                 <Card>
                     <CardHeader>
+                        <CardTitle>Invite New User</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="mb-4">Invite new users to the system.</p>
+                        <Button asChild>
+                            <Link href="/dashboard/admin/invite-user">Invite User</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
                         <CardTitle>Audit Logs</CardTitle>
                     </CardHeader>
                     <CardContent>

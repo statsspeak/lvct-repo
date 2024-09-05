@@ -11,6 +11,7 @@ const navItems = {
     ADMIN: [
         { href: "/dashboard/admin", label: "Overview" },
         { href: "/dashboard/admin/users", label: "Manage Users" },
+        { href: "/dashboard/admin/invite-user", label: "Invite Users" },
         { href: "/dashboard/admin/audit-logs", label: "Audit Logs" },
         { href: "/dashboard/admin/analytics", label: "Analytics" },
     ],
@@ -59,8 +60,8 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
                                     key={item.href}
                                     href={item.href}
                                     className={`px-3 py-2 rounded-md text-sm font-medium ${pathname === item.href
-                                            ? 'bg-gray-200 text-gray-900'
-                                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                                        ? 'bg-gray-200 text-gray-900'
+                                        : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                                         }`}
                                     aria-current={pathname === item.href ? 'page' : undefined}
                                 >
@@ -96,8 +97,8 @@ export function DashboardNav({ userRole }: DashboardNavProps) {
                                 key={item.href}
                                 href={item.href}
                                 className={`block px-3 py-2 rounded-md text-base font-medium ${pathname === item.href
-                                        ? 'bg-gray-200 text-gray-900'
-                                        : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                                    ? 'bg-gray-200 text-gray-900'
+                                    : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                                     }`}
                                 aria-current={pathname === item.href ? 'page' : undefined}
                             >
