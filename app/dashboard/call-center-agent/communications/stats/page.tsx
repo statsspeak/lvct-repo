@@ -13,6 +13,7 @@ export default function CommunicationStatsPage() {
         <CardContent>
           <CommunicationDashboard />
         </CardContent>
+        
       </Card>
     </div>
   );
