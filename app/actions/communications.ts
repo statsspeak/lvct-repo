@@ -138,6 +138,9 @@ export async function recordCommunication(formData: FormData) {
     return { success: true, communication };
   } catch (error) {
     console.error("Failed to record communication:", error);
+    if (error instanceof Error) {
+      return { error: `Failed to record communication: ${error.message}` };
+    }
     return { error: "Failed to record communication" };
   }
 }

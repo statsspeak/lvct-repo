@@ -1,78 +1,104 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, useSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-
-const loginSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Icons } from '@/components/ui/icons'
+import Link from 'next/link'
 
 export default function Login() {
-    const [error, setError] = useState('')
-    const router = useRouter()
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
-        resolver: zodResolver(loginSchema),
-    })
-    const { data: session } = useSession()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
-    // Redirect if already logged in
-    if (session) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError(result.error)
+      } else {
         router.push('/dashboard')
-        return null
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    const onSubmit = async (data: LoginFormData) => {
-        setError('')
-
-        const result = await signIn('credentials', {
-            ...data,
-            redirect: false,
-        })
-
-        if (result?.error) {
-            setError('Invalid email or password')
-        } else {
-            router.push('/dashboard')
-        }
-    }
-
-    return (
-        <div className="flex min-h-screen items-center justify-center">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md p-8 bg-white                                                                                    shadow-lg rounded-lg">
-                <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
-                {error && <p className="text-red-500 text-center">{error}</p>}
-                <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        {...register('email')}
-                        aria-invalid={errors.email ? 'true' : 'false'}
-                    />
-                    {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-                </div>
-                <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        {...register('password')}
-                        aria-invalid={errors.password ? 'true' : 'false'}
-                    />
-                    {errors.password && <p className="text-red-500">{errors.password.message}</p>}
-                </div>
-                <Button type="submit" className="w-full">Login</Button>
-            </form>
-        </div>
-    )
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-700 to-red-500 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold text-center text-purple-800">Welcome Back</CardTitle>
+          <CardDescription className="text-center text-gray-600">
+            Sign in to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-purple-800">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="border-purple-300 focus:border-purple-500 focus:ring-purple-500"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-purple-800">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="border-purple-300 focus:border-purple-500 focus:ring-purple-500"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <Link href="/reset-password-request" className="text-sm text-purple-800 hover:underline">
+            Forgot password?
+          </Link>
+        </CardFooter>
+      </Card>
+    </div>
+  )
 }

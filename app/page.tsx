@@ -1,18 +1,24 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Clipboard, FlaskRound, PhoneCall } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { BackgroundPattern } from '@/components/BackgroundPattern'
-import { HealthcareIllustration } from '@/components/HealthcareIllustration'
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { ScrollingStats } from '@/components/ScrollingStats'
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Clipboard, FlaskRound, PhoneCall } from "lucide-react";
+import { motion } from "framer-motion";
+import { BackgroundPattern } from "@/components/BackgroundPattern";
+import { HealthcareIllustration } from "@/components/HealthcareIllustration";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ScrollingStats } from "@/components/ScrollingStats";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white dark:from-gray-900 dark:to-gray-800 relative">
+    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-white dark:from-gray-900 dark:to-gray-800 relative">
       <BackgroundPattern />
       <div className="relative z-10">
         <header className="container mx-auto px-4 py-8">
@@ -21,7 +27,7 @@ export default function Home() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+              className="text-2xl font-bold text-lvct-red dark:text-lvct-red"
             >
               HPV Journey Tracker
             </motion.h1>
@@ -44,9 +50,17 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-teal-400">Streamline HPV Patient Care</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">Efficient tracking and management for better health outcomes</p>
-            <Button size="lg" asChild className="animate-pulse hover:animate-none">
+            <h2 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-lvct-red to-lvct-purple">
+              Streamline HPV Patient Care
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+              Efficient tracking and management for better health outcomes
+            </p>
+            <Button
+              size="lg"
+              asChild
+              className="animate-pulse hover:animate-none bg-lvct-red hover:bg-red-600"
+            >
               <Link href="/login">Start Your Journey</Link>
             </Button>
           </motion.section>
@@ -69,17 +83,17 @@ export default function Home() {
             <FeatureCard
               title="Patient Registration"
               description="Easily register patients and generate unique QR codes for seamless tracking."
-              icon={<Clipboard className="w-8 h-8 text-blue-500" />}
+              icon={<Clipboard className="w-8 h-8 text-lvct-red" />}
             />
             <FeatureCard
               title="Lab Management"
               description="Efficiently manage lab tests from sample collection to result communication."
-              icon={<FlaskRound className="w-8 h-8 text-blue-500" />}
+              icon={<FlaskRound className="w-8 h-8 text-lvct-purple" />}
             />
             <FeatureCard
               title="Communication Hub"
               description="Streamline patient communications and follow-ups in one central location."
-              icon={<PhoneCall className="w-8 h-8 text-blue-500" />}
+              icon={<PhoneCall className="w-8 h-8 text-lvct-red" />}
             />
           </motion.section>
 
@@ -91,12 +105,21 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 1 }}
             className="text-center mb-16"
           >
-            <h3 className="text-3xl font-bold mb-4">Empowering Healthcare Professionals</h3>
+            <h3 className="text-3xl font-bold mb-4">
+              Empowering Healthcare Professionals
+            </h3>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-              Our platform is designed to support healthcare staff, lab technicians, and administrators
-              in providing top-notch care for HPV patients.
+              Our platform is designed to support healthcare staff, lab
+              technicians, and administrators in providing top-notch care for
+              HPV patients.
             </p>
-            <Button variant="outline" size="lg" className="hover:bg-blue-500 hover:text-white transition-colors duration-300">Learn More</Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="hover:bg-lvct-purple hover:text-white transition-colors duration-300"
+            >
+              Learn More
+            </Button>
           </motion.section>
         </main>
 
@@ -107,10 +130,18 @@ export default function Home() {
         </footer>
       </div>
     </div>
-  )
+  );
 }
 
-function FeatureCard({ title, description, icon }: { title: string; description: string; icon: React.ReactNode }) {
+function FeatureCard({
+  title,
+  description,
+  icon,
+}: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+}) {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
@@ -126,12 +157,12 @@ function FeatureCard({ title, description, icon }: { title: string; description:
           >
             {icon}
           </motion.div>
-          <CardTitle className="text-blue-600">{title}</CardTitle>
+          <CardTitle className="text-lvct-purple">{title}</CardTitle>
         </CardHeader>
         <CardContent>
           <CardDescription>{description}</CardDescription>
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }

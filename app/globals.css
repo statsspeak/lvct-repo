@@ -7,33 +7,33 @@
 @layer base {
   :root {
     /* Colors */
-    --color-primary: 59, 130, 246;
-    --color-secondary: 16, 185, 129;
-    --color-background: 243, 244, 246;
-    --color-text: 31, 41, 55;
-    --color-error: 239, 68, 68;
-    --color-success: 16, 185, 129;
+    --color-primary: 220, 53, 69; /* Red */
+    --color-secondary: 102, 51, 153; /* Purple */
+    --color-background: 255, 255, 255; /* White */
+    --color-text: 33, 37, 41; /* Dark gray for text */
+    --color-error: 220, 53, 69; /* Red */
+    --color-success: 40, 167, 69; /* Green */
 
-    /* Custom properties from the second snippet */
+    /* Custom properties */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 348 75% 53%; /* Red */
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 270 50% 40%; /* Purple */
+    --secondary-foreground: 210 40% 98%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 270 50% 40%; /* Purple */
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 348 75% 53%; /* Red */
     --radius: 0.5rem;
   }
 
@@ -44,19 +44,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary: 348 75% 53%; /* Red */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 270 50% 40%; /* Purple */
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 270 50% 40%; /* Purple */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 348 75% 53%; /* Red */
   }
 
   * {
@@ -81,11 +81,11 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded;
+    @apply bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded;
   }
 
   .btn-secondary {
-    @apply bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded;
+    @apply bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded;
   }
 
   .card {

@@ -76,7 +76,7 @@ export default function CommunicationsPage() {
                             <TableCell>{`${patient.firstName} ${patient.lastName}`}</TableCell>
                             <TableCell>{patient.tests[0]?.status || 'No tests'}</TableCell>
                             <TableCell>
-                                <Link href={`/dashboard/communications/${patient.id}`}>
+                                <Link href={`/dashboard/call-center-agent/communications/${patient.id}`}>
                                     <Button variant="outline">View Communications</Button>
                                 </Link>
                             </TableCell>

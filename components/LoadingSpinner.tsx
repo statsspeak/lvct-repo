@@ -1,10 +1,10 @@
-"use client"
-import { Loader2 } from 'lucide-react';
+"use client";
+import { Loader2 } from "lucide-react";
 
 export function LoadingSpinner() {
-    return (
-        <div className="flex justify-center items-center h-full">
-            <Loader2 className="animate-spin h-8 w-8 text-primary" />
-        </div>
-    );
+  return (
+    <div className="flex justify-center items-center h-full">
+      <Loader2 className="animate-spin h-8 w-8 text-lvct-purple" />
+    </div>
+  );
 }

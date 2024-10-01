@@ -149,7 +149,7 @@ const config = {
   events: {
     async signIn({ user, account, isNewUser }) {
       await logAuditEvent(
-        user.id || '',
+        user.id || "",
         "SIGN_IN",
         `Method: ${account?.provider || "unknown"}`
       );

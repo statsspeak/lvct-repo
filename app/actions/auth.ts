@@ -14,7 +14,6 @@ const userSchema = z.object({
   role: z.enum(["ADMIN", "STAFF", "LAB_TECHNICIAN", "CALL_CENTER_AGENT"]),
 });
 
-
 const inviteSchema = z.object({
   email: z.string().email("Invalid email"),
   role: z.enum(["STAFF", "LAB_TECHNICIAN", "CALL_CENTER_AGENT"]),
@@ -64,8 +63,11 @@ export async function inviteUser(formData: FormData) {
     revalidatePath("/dashboard/users");
     return { message: "Invitation sent successfully" };
   } catch (error) {
-    console.error("Failed to send invitation", error)
-    return { error: "Failed to send invitation. Please check your server logs for more details" };
+    console.error("Failed to send invitation", error);
+    return {
+      error:
+        "Failed to send invitation. Please check your server logs for more details",
+    };
   }
 }
 
