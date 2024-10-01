@@ -1,70 +1,51 @@
-import React from 'react';
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TestStatus } from "@prisma/client";
+
+interface Patient {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  email: string | null;
+  phone: string | null;
+}
 
 interface PatientDetailsProps {
-    patient: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        dateOfBirth: Date;
-        email: string | null;
-        phone: string | null;
-        tests: Array<{
-            id: string;
-            status: TestStatus;
-            collectionDate: Date;
-            resultDate: Date | null;
-        }>;
-    };
+  patient: Patient;
 }
 
 export function PatientDetails({ patient }: PatientDetailsProps) {
-    const latestTest = patient.tests[0]; // Assuming tests are ordered by date desc
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Patient Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="font-semibold">Name:</p>
-                        <p>{`${patient.firstName} ${patient.lastName}`}</p>
-                    </div>
-                    <div>
-                        <p className="font-semibold">Date of Birth:</p>
-                        <p>{patient.dateOfBirth.toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                        <p className="font-semibold">Email:</p>
-                        <p>{patient.email || 'N/A'}</p>
-                    </div>
-                    <div>
-                        <p className="font-semibold">Phone:</p>
-                        <p>{patient.phone || 'N/A'}</p>
-                    </div>
-                    {latestTest && (
-                        <>
-                            <div>
-                                <p className="font-semibold">Latest Test Status:</p>
-                                <p>{latestTest.status}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Test Collection Date:</p>
-                                <p>{latestTest.collectionDate.toLocaleDateString()}</p>
-                            </div>
-                            {latestTest.resultDate && (
-                                <div>
-                                    <p className="font-semibold">Test Result Date:</p>
-                                    <p>{latestTest.resultDate.toLocaleDateString()}</p>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    );
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Patient Details</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Name</dt>
+            <dd className="mt-1 text-sm text-gray-900">{`${patient.firstName} ${patient.lastName}`}</dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Date of Birth</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {new Date(patient.dateOfBirth).toLocaleDateString()}
+            </dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Email</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {patient.email || "N/A"}
+            </dd>
+          </div>
+          <div className="sm:col-span-1">
+            <dt className="text-sm font-medium text-gray-500">Phone</dt>
+            <dd className="mt-1 text-sm text-gray-900">
+              {patient.phone || "N/A"}
+            </dd>
+          </div>
+        </dl>
+      </CardContent>
+    </Card>
+  );
 }

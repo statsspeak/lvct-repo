@@ -10,8 +10,8 @@ import {
 } from "@prisma/client";
 
 const communicationSchema = z.object({
-  patientId: z.string().cuid(),
-  testId: z.string().cuid(),
+  patientId: z.string().uuid(),
+  testId: z.string().uuid(),
   method: z.enum(["PHONE", "EMAIL", "SMS"]),
   outcome: z.enum(["SUCCESSFUL", "UNSUCCESSFUL", "NO_ANSWER"]),
   notes: z.string().optional(),
@@ -91,21 +91,15 @@ export async function getPatientsWithTests(
     return { error: "Failed to fetch patients with tests" };
   }
 }
-
-export async function recordCommunication(formData: FormData) {
+export async function recordCommunication(
+  data: z.infer<typeof communicationSchema>
+) {
   const session = await auth();
   if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
     return { error: "Unauthorized" };
   }
 
-  const validatedFields = communicationSchema.safeParse({
-    patientId: formData.get("patientId"),
-    testId: formData.get("testId"),
-    method: formData.get("method"),
-    outcome: formData.get("outcome"),
-    notes: formData.get("notes"),
-    followUpDate: formData.get("followUpDate"),
-  });
+  const validatedFields = communicationSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return { error: validatedFields.error.flatten().fieldErrors };

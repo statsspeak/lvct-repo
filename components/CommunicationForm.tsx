@@ -1,11 +1,9 @@
-"use client";
-
+"use client"
 import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { recordCommunication } from "@/app/actions/communications";
 import {
@@ -17,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
 
 const schema = z.object({
   method: z.enum(["PHONE", "EMAIL", "SMS"]),
@@ -29,9 +28,13 @@ type FormData = z.infer<typeof schema>;
 
 interface CommunicationFormProps {
   patientId: string;
+  testId: string;
 }
 
-export function CommunicationForm({ patientId }: CommunicationFormProps) {
+export function CommunicationForm({
+  patientId,
+  testId,
+}: CommunicationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     control,
@@ -44,24 +47,17 @@ export function CommunicationForm({ patientId }: CommunicationFormProps) {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append("patientId", patientId);
-    Object.entries(data).forEach(([key, value]) => {
-      if (value) formData.append(key, value);
-    });
-
     try {
-      const result = await recordCommunication(formData);
-      if ("error" in result) {
-        let errorMessage = "An error occurred";
-        if (typeof result.error === "string") {
-          errorMessage = result.error;
-        } else if (result.error && typeof result.error === "object") {
-          errorMessage = JSON.stringify(result.error);
-        }
+      const result = await recordCommunication({
+        patientId,
+        testId,
+        ...data,
+      });
+
+      if ("error" in result && result.error) {
         toast({
           title: "Error",
-          description: errorMessage,
+          description: result.error.toString(),
           variant: "destructive",
         });
       } else {
@@ -73,13 +69,9 @@ export function CommunicationForm({ patientId }: CommunicationFormProps) {
       }
     } catch (error) {
       console.error("Failed to record communication:", error);
-      let errorMessage = "An unexpected error occurred";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
       toast({
         title: "Error",
-        description: errorMessage,
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
