@@ -1,43 +1,60 @@
-import { getLockedAccounts, unlockAccount } from "@/app/actions/admin"
-import { Button } from "@/components/ui/button"
+import { getLockedAccounts, unlockAccount } from "@/app/actions/admin";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function LockedAccounts() {
-    const { lockedAccounts, error } = await getLockedAccounts()
+  const { lockedAccounts, error } = await getLockedAccounts();
 
-    if (error) {
-        return <div>Error: {error}</div>
-    }
+  if (error) {
+    return <div className="text-center text-lvct-red">Error: {error}</div>;
+  }
 
-    return (
-        <div>
-            <h1 className="text-2xl font-bold mb-4">Locked Accounts</h1>
-            <table className="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th className="py-2 px-4 border-b">Name</th>
-                        <th className="py-2 px-4 border-b">Email</th>
-                        <th className="py-2 px-4 border-b">Locked Until</th>
-                        <th className="py-2 px-4 border-b">Failed Attempts</th>
-                        <th className="py-2 px-4 border-b">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {lockedAccounts?.map((account) => (
-                        <tr key={account.id}>
-                            <td className="py-2 px-4 border-b">{account.name}</td>
-                            <td className="py-2 px-4 border-b">{account.email}</td>
-                            <td className="py-2 px-4 border-b">{account.lockedUntil?.toLocaleString()}</td>
-                            <td className="py-2 px-4 border-b">{account.failedAttempts}</td>
-                            <td className="py-2 px-4 border-b">
-                                <form action={unlockAccount}>
-                                    <input type="hidden" name="userId" value={account.id} />
-                                    <Button type="submit">Unlock</Button>
-                                </form>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    )
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold text-lvct-purple">Locked Accounts</h1>
+      <div className="bg-white rounded-lg shadow overflow-hidden border border-lvct-purple text-black">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-lvct-purple text-white">
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Locked Until</TableHead>
+              <TableHead>Failed Attempts</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {lockedAccounts?.map((account) => (
+              <TableRow key={account.id} className="hover:bg-gray-50">
+                <TableCell>{account.name}</TableCell>
+                <TableCell>{account.email}</TableCell>
+                <TableCell>{account.lockedUntil?.toLocaleString()}</TableCell>
+                <TableCell>{account.failedAttempts}</TableCell>
+                <TableCell>
+                  <form action={unlockAccount}>
+                    <input type="hidden" name="userId" value={account.id} />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      size="sm"
+                      className="border-lvct-red text-lvct-red hover:bg-lvct-red hover:text-white"
+                    >
+                      Unlock
+                    </Button>
+                  </form>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
 }

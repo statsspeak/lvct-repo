@@ -1,14 +1,15 @@
-"use server"
+"use server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
 export async function getAnalyticsOverview() {
-  const session = await auth();
-  if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const session = await auth();
+    if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
+      console.error("Unauthorized access attempt in getAnalyticsOverview");
+      return { error: "Unauthorized" };
+    }
+
     const totalPatients = await prisma.patient.count();
     const totalTests = await prisma.test.count();
     const completedTests = await prisma.test.count({
@@ -27,18 +28,22 @@ export async function getAnalyticsOverview() {
         completedTests > 0 ? (positiveTests / completedTests) * 100 : 0,
     };
   } catch (error) {
-    console.error("Failed to fetch analytics overview:", error);
+    console.error("Error in getAnalyticsOverview:", error);
     return { error: "Failed to fetch analytics overview" };
   }
 }
 
 export async function getTestResultsAnalytics() {
-  const session = await auth();
-  if (!session || !["ADMIN", "STAFF","LAB_TECHNICIAN"].includes((session.user as any).role)) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const session = await auth();
+    if (
+      !session ||
+      !["ADMIN", "STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
+    ) {
+      console.error("Unauthorized access attempt in getTestResultsAnalytics");
+      return { error: "Unauthorized" };
+    }
+
     const resultCounts = await prisma.test.groupBy({
       by: ["result"],
       _count: true,
@@ -49,18 +54,19 @@ export async function getTestResultsAnalytics() {
       count: rc._count,
     }));
   } catch (error) {
-    console.error("Failed to fetch test results analytics:", error);
+    console.error("Error in getTestResultsAnalytics:", error);
     return { error: "Failed to fetch test results analytics" };
   }
 }
 
 export async function getPatientDemographics() {
-  const session = await auth();
-  if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const session = await auth();
+    if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
+      console.error("Unauthorized access attempt in getPatientDemographics");
+      return { error: "Unauthorized" };
+    }
+
     const patients = await prisma.patient.findMany({
       select: {
         dateOfBirth: true,
@@ -89,18 +95,81 @@ export async function getPatientDemographics() {
       count,
     }));
   } catch (error) {
-    console.error("Failed to fetch patient demographics:", error);
+    console.error("Error in getPatientDemographics:", error);
     return { error: "Failed to fetch patient demographics" };
   }
 }
 
-export async function getTurnaroundTimeAnalytics() {
-  const session = await auth();
-  if (!session || !["ADMIN", "STAFF","LAB_TECHNICIAN"].includes((session.user as any).role)) {
-    return { error: "Unauthorized" };
-  }
+// export async function getTurnaroundTimeAnalytics() {
+//   try {
+//     const session = await auth();
+//     if (
+//       !session ||
+//       !["ADMIN", "STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
+//     ) {
+//       console.error(
+//         "Unauthorized access attempt in getTurnaroundTimeAnalytics"
+//       );
+//       return { error: "Unauthorized" };
+//     }
 
+//     const tests = await prisma.test.findMany({
+//       where: { status: "COMPLETED" },
+//       select: {
+//         collectionDate: true,
+//         resultDate: true,
+//       },
+//     });
+
+//     const turnaroundTimes = tests.map((test) => {
+//       const turnaroundTime =
+//         test.resultDate!.getTime() - test.collectionDate.getTime();
+//       return turnaroundTime / (1000 * 60 * 60 * 24); // Convert to days
+//     });
+
+//     const averageTurnaroundTime =
+//       turnaroundTimes.reduce((a, b) => a + b, 0) / turnaroundTimes.length;
+
+//     return {
+//       averageTurnaroundTime,
+//       turnaroundTimeDistribution: [
+//         {
+//           range: "0-1 days",
+//           count: turnaroundTimes.filter((t) => t <= 1).length,
+//         },
+//         {
+//           range: "2-3 days",
+//           count: turnaroundTimes.filter((t) => t > 1 && t <= 3).length,
+//         },
+//         {
+//           range: "4-7 days",
+//           count: turnaroundTimes.filter((t) => t > 3 && t <= 7).length,
+//         },
+//         {
+//           range: "8+ days",
+//           count: turnaroundTimes.filter((t) => t > 7).length,
+//         },
+//       ],
+//     };
+//   } catch (error) {
+//     console.error("Error in getTurnaroundTimeAnalytics:", error);
+//     return { error: "Failed to fetch turnaround time analytics" };
+//   }
+// }
+export async function getTurnaroundTimeAnalytics() {
   try {
+    const session = await auth();
+    if (
+      !session ||
+      !["ADMIN", "STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
+    ) {
+      console.error(
+        "Unauthorized access attempt in getTurnaroundTimeAnalytics"
+      );
+      return { error: "Unauthorized" };
+    }
+
+    console.log("Fetching completed tests...");
     const tests = await prisma.test.findMany({
       where: { status: "COMPLETED" },
       select: {
@@ -108,50 +177,80 @@ export async function getTurnaroundTimeAnalytics() {
         resultDate: true,
       },
     });
+    console.log(`Found ${tests.length} completed tests`);
 
-    const turnaroundTimes = tests.map((test) => {
-      const turnaroundTime =
-        test.resultDate!.getTime() - test.collectionDate.getTime();
-      return turnaroundTime / (1000 * 60 * 60 * 24); // Convert to days
-    });
+    if (tests.length === 0) {
+      console.log("No completed tests found");
+      return {
+        averageTurnaroundTime: 0,
+        turnaroundTimeDistribution: [
+          { range: "0-1 days", count: 0 },
+          { range: "2-3 days", count: 0 },
+          { range: "4-7 days", count: 0 },
+          { range: "8+ days", count: 0 },
+        ],
+      };
+    }
+
+    console.log("Calculating turnaround times...");
+    const turnaroundTimes = tests
+      .map((test) => {
+        if (!test.resultDate) {
+          console.warn("Test found without resultDate:", test);
+          return null;
+        }
+        const turnaroundTime =
+          test.resultDate.getTime() - test.collectionDate.getTime();
+        return turnaroundTime / (1000 * 60 * 60 * 24); // Convert to days
+      })
+      .filter((time): time is number => time !== null);
+
+    console.log(`Calculated ${turnaroundTimes.length} valid turnaround times`);
 
     const averageTurnaroundTime =
       turnaroundTimes.reduce((a, b) => a + b, 0) / turnaroundTimes.length;
 
+    const distribution = [
+      {
+        range: "0-1 days",
+        count: turnaroundTimes.filter((t) => t <= 1).length,
+      },
+      {
+        range: "2-3 days",
+        count: turnaroundTimes.filter((t) => t > 1 && t <= 3).length,
+      },
+      {
+        range: "4-7 days",
+        count: turnaroundTimes.filter((t) => t > 3 && t <= 7).length,
+      },
+      {
+        range: "8+ days",
+        count: turnaroundTimes.filter((t) => t > 7).length,
+      },
+    ];
+
+    console.log("Turnaround time analytics calculated successfully");
+
     return {
       averageTurnaroundTime,
-      turnaroundTimeDistribution: [
-        {
-          range: "0-1 days",
-          count: turnaroundTimes.filter((t) => t <= 1).length,
-        },
-        {
-          range: "2-3 days",
-          count: turnaroundTimes.filter((t) => t > 1 && t <= 3).length,
-        },
-        {
-          range: "4-7 days",
-          count: turnaroundTimes.filter((t) => t > 3 && t <= 7).length,
-        },
-        {
-          range: "8+ days",
-          count: turnaroundTimes.filter((t) => t > 7).length,
-        },
-      ],
+      turnaroundTimeDistribution: distribution,
     };
   } catch (error) {
-    console.error("Failed to fetch turnaround time analytics:", error);
+    console.error("Error in getTurnaroundTimeAnalytics:", error);
     return { error: "Failed to fetch turnaround time analytics" };
   }
 }
 
 export async function getCommunicationEffectivenessMetrics() {
-  const session = await auth();
-  if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    const session = await auth();
+    if (!session || !["ADMIN", "STAFF"].includes((session.user as any).role)) {
+      console.error(
+        "Unauthorized access attempt in getCommunicationEffectivenessMetrics"
+      );
+      return { error: "Unauthorized" };
+    }
+
     const totalCommunications = await prisma.communication.count();
     const successfulCommunications = await prisma.communication.count({
       where: { outcome: "SUCCESSFUL" },
@@ -171,10 +270,7 @@ export async function getCommunicationEffectivenessMetrics() {
       })),
     };
   } catch (error) {
-    console.error(
-      "Failed to fetch communication effectiveness metrics:",
-      error
-    );
+    console.error("Error in getCommunicationEffectivenessMetrics:", error);
     return { error: "Failed to fetch communication effectiveness metrics" };
   }
 }
