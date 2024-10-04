@@ -27,7 +27,7 @@ export default function Home() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-2xl font-bold text-lvct-red dark:text-lvct-red"
+              className="text-3xl font-bold text-lvct-red dark:text-lvct-red"
             >
               HPV Journey Tracker
             </motion.h1>
@@ -36,7 +36,10 @@ export default function Home() {
               <Button variant="ghost" asChild>
                 <Link href="/login">Login</Link>
               </Button>
-              <Button asChild>
+              <Button
+                asChild
+                className="bg-lvct-purple hover:bg-purple-700 text-white"
+              >
                 <Link href="/login">Get Started</Link>
               </Button>
             </div>
@@ -50,16 +53,16 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-lvct-red to-lvct-purple">
+            <h2 className="text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-lvct-red to-lvct-purple">
               Streamline HPV Patient Care
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+            <p className="text-2xl text-gray-600 dark:text-gray-300 mb-8">
               Efficient tracking and management for better health outcomes
             </p>
             <Button
               size="lg"
               asChild
-              className="animate-pulse hover:animate-none bg-lvct-red hover:bg-red-600"
+              className="animate-pulse hover:animate-none bg-lvct-red hover:bg-red-600 text-white text-lg py-6 px-8"
             >
               <Link href="/login">Start Your Journey</Link>
             </Button>
@@ -83,17 +86,17 @@ export default function Home() {
             <FeatureCard
               title="Patient Registration"
               description="Easily register patients and generate unique QR codes for seamless tracking."
-              icon={<Clipboard className="w-8 h-8 text-lvct-red" />}
+              icon={<Clipboard className="w-12 h-12 text-lvct-red" />}
             />
             <FeatureCard
               title="Lab Management"
               description="Efficiently manage lab tests from sample collection to result communication."
-              icon={<FlaskRound className="w-8 h-8 text-lvct-purple" />}
+              icon={<FlaskRound className="w-12 h-12 text-lvct-purple" />}
             />
             <FeatureCard
               title="Communication Hub"
               description="Streamline patient communications and follow-ups in one central location."
-              icon={<PhoneCall className="w-8 h-8 text-lvct-red" />}
+              icon={<PhoneCall className="w-12 h-12 text-lvct-red" />}
             />
           </motion.section>
 
@@ -103,12 +106,12 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1 }}
-            className="text-center mb-16"
+            className="text-center mb-16 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8"
           >
-            <h3 className="text-3xl font-bold mb-4">
+            <h3 className="text-4xl font-bold mb-4 text-lvct-purple">
               Empowering Healthcare Professionals
             </h3>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
               Our platform is designed to support healthcare staff, lab
               technicians, and administrators in providing top-notch care for
               HPV patients.
@@ -116,7 +119,7 @@ export default function Home() {
             <Button
               variant="outline"
               size="lg"
-              className="hover:bg-lvct-purple hover:text-white transition-colors duration-300"
+              className="hover:bg-lvct-purple hover:text-white transition-colors duration-300 text-lg py-6 px-8"
             >
               Learn More
             </Button>
@@ -153,14 +156,14 @@ function FeatureCard({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-2"
+            className="mb-4"
           >
             {icon}
           </motion.div>
-          <CardTitle className="text-lvct-purple">{title}</CardTitle>
+          <CardTitle className="text-2xl text-lvct-purple">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>{description}</CardDescription>
+          <CardDescription className="text-lg">{description}</CardDescription>
         </CardContent>
       </Card>
     </motion.div>
