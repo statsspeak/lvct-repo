@@ -17,11 +17,19 @@ const patientSchema = z.object({
   }),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   phone: z.string().optional(),
+  address: z.string().min(1, "Address is required"),
+  hivStatus: z.enum(["POSITIVE", "NEGATIVE", "UNKNOWN"]),
+  medicalHistory: z.string().optional(),
+  riskFactors: z.string().optional(),
 });
 
 export async function registerPatient(formData: FormData) {
   const session = await auth();
-  if (!session || !session.user || (session.user as any).role !== "STAFF") {
+  if (
+    !session ||
+    !session.user ||
+    !["STAFF", "ADMIN"].includes((session.user as any).role)
+  ) {
     return { error: "Unauthorized. Only staff members can register patients." };
   }
 
@@ -31,14 +39,27 @@ export async function registerPatient(formData: FormData) {
     dateOfBirth: formData.get("dateOfBirth"),
     email: formData.get("email"),
     phone: formData.get("phone"),
+    address: formData.get("address"),
+    hivStatus: formData.get("hivStatus"),
+    medicalHistory: formData.get("medicalHistory"),
+    riskFactors: formData.get("riskFactors"),
   });
 
   if (!validatedFields.success) {
     return { error: validatedFields.error.flatten().fieldErrors };
   }
 
-  const { firstName, lastName, dateOfBirth, email, phone } =
-    validatedFields.data;
+  const {
+    firstName,
+    lastName,
+    dateOfBirth,
+    email,
+    phone,
+    address,
+    hivStatus,
+    medicalHistory,
+    riskFactors,
+  } = validatedFields.data;
   const consentForm = formData.get("consentForm") as File | null;
 
   try {
@@ -51,9 +72,6 @@ export async function registerPatient(formData: FormData) {
     const patientId = uuidv4();
     const qrCodeDataUrl = await QRCode.toDataURL(patientId);
 
-    if (!session.user.id) {
-      return { error: "User ID not found in user session" };
-    }
     const patient = await prisma.patient.create({
       data: {
         id: patientId,
@@ -62,9 +80,13 @@ export async function registerPatient(formData: FormData) {
         dateOfBirth: new Date(dateOfBirth),
         email: email || null,
         phone: phone || null,
+        address,
+        hivStatus,
+        medicalHistory: medicalHistory || null,
+        riskFactors: riskFactors || null,
         consentForm: consentFormUrl,
         qrCode: qrCodeDataUrl,
-        createdBy: session.user.id,
+        createdBy: session.user.id || "",
       },
     });
 
@@ -75,7 +97,107 @@ export async function registerPatient(formData: FormData) {
     return { error: "Failed to register patient" };
   }
 }
+const patientSelfRegistrationSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  dateOfBirth: z.string().refine((date) => !isNaN(Date.parse(date)), {
+    message: "Invalid date format",
+  }),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  phone: z.string().optional(),
+  address: z.string().min(1, "Address is required"),
+  hivStatus: z.enum(["POSITIVE", "NEGATIVE", "UNKNOWN"]),
+  medicalHistory: z.string().optional(),
+  riskFactors: z.string().optional(),
+});
 
+export async function submitPatientSelfRegistration(
+  uniqueId: string,
+  data: z.infer<typeof patientSelfRegistrationSchema>
+) {
+  const validatedFields = patientSelfRegistrationSchema.safeParse(data);
+
+  if (!validatedFields.success) {
+    return { error: validatedFields.error.flatten().fieldErrors };
+  }
+
+  try {
+    await prisma.patientSelfRegistration.create({
+      data: {
+        ...validatedFields.data,
+        uniqueId,
+        status: "PENDING",
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to submit patient self-registration:", error);
+    return { error: "Failed to submit patient self-registration" };
+  }
+}
+
+export async function getPatientSelfRegistrations() {
+  const session = await auth();
+  if (!session || !["STAFF", "ADMIN"].includes((session.user as any).role)) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const selfRegistrations = await prisma.patientSelfRegistration.findMany({
+      where: { status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+    });
+    return { selfRegistrations };
+  } catch (error) {
+    console.error("Failed to fetch patient self-registrations:", error);
+    return { error: "Failed to fetch patient self-registrations" };
+  }
+}
+
+export async function approvePatientSelfRegistration(id: string) {
+  const session = await auth();
+  if (!session || !["STAFF", "ADMIN"].includes((session.user as any).role)) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const selfRegistration = await prisma.patientSelfRegistration.findUnique({
+      where: { id },
+    });
+
+    if (!selfRegistration) {
+      return { error: "Self-registration not found" };
+    }
+
+    const patient = await prisma.patient.create({
+      data: {
+        firstName: selfRegistration.firstName,
+        lastName: selfRegistration.lastName,
+        dateOfBirth: new Date(selfRegistration.dateOfBirth),
+        email: selfRegistration.email,
+        phone: selfRegistration.phone,
+        address: selfRegistration.address,
+        hivStatus: selfRegistration.hivStatus,
+        medicalHistory: selfRegistration.medicalHistory,
+        riskFactors: selfRegistration.riskFactors,
+        qrCode: "", // Add an empty string for qrCode
+        createdByUser: { connect: { id: (session.user as any).id } }, // Use connect to link the user
+      },
+    });
+
+    await prisma.patientSelfRegistration.update({
+      where: { id },
+      data: { status: "APPROVED" },
+    });
+
+    revalidatePath("/dashboard/patients");
+    return { success: true, patient };
+  } catch (error) {
+    console.error("Failed to approve patient self-registration:", error);
+    return { error: "Failed to approve patient self-registration" };
+  }
+}
 export async function getPatients(search?: string) {
   const session = await auth();
   if (!session) {

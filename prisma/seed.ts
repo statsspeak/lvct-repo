@@ -46,6 +46,8 @@ async function main() {
           phone: faker.phone.number(),
           qrCode: faker.string.alphanumeric(10),
           createdBy: users[1].id, // Staff member creates patients
+          address: faker.location.streetAddress(),
+          hivStatus: faker.helpers.arrayElement(['POSITIVE', 'NEGATIVE', 'UNKNOWN']),
         },
       });
     })

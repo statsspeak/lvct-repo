@@ -6,6 +6,11 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  UserPlus,
+  ClipboardList,
+  Stethoscope,
+  User,
+  Activity,
 } from "lucide-react";
 import React from "react";
 
@@ -37,4 +42,9 @@ export const Icons = {
   eye: Eye,
   eyeOff: EyeOff,
   alertCircle: AlertCircle,
+  userPlus: UserPlus,
+  clipboardList: ClipboardList,
+  stethoscope: Stethoscope,
+  user: User,
+  activity: Activity,
 };

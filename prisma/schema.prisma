@@ -8,19 +8,19 @@ datasource db {
 }
 
 model User {
-  id                String    @id @default(uuid())
-  name              String?
-  email             String    @unique
-  password          String?
-  role              Role      @default(STAFF)
-  invitationToken   String?   @unique
-  resetToken        String?   @unique
-  resetTokenExpiry  DateTime?
-  failedAttempts    Int       @default(0)
-  lockedUntil       DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
+  id               String    @id @default(uuid())
+  name             String?
+  email            String    @unique
+  password         String?
+  role             Role      @default(STAFF)
+  invitationToken  String?   @unique
+  resetToken       String?   @unique
+  resetTokenExpiry DateTime?
+  failedAttempts   Int       @default(0)
+  lockedUntil      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
   profession        String?
   qualifications    String?
   phoneNumber       String?
@@ -64,6 +64,10 @@ model Patient {
   dateOfBirth    DateTime
   email          String?
   phone          String?
+  address        String
+  hivStatus      HIVStatus
+  medicalHistory String?
+  riskFactors    String?
   consentForm    String?
   qrCode         String
   createdBy      String
@@ -72,6 +76,35 @@ model Patient {
   updatedAt      DateTime        @updatedAt
   tests          Test[]
   communications Communication[]
+}
+
+model PatientSelfRegistration {
+  id             String    @id @default(uuid())
+  uniqueId       String    @unique
+  firstName      String
+  lastName       String
+  dateOfBirth    String
+  email          String?
+  phone          String?
+  address        String
+  hivStatus      HIVStatus
+  medicalHistory String?
+  riskFactors    String?
+  status         SelfRegistrationStatus @default(PENDING)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+enum SelfRegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum HIVStatus {
+  POSITIVE
+  NEGATIVE
+  UNKNOWN
 }
 
 model Test {

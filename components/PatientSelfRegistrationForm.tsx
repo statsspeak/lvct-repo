@@ -33,7 +33,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
-import { registerPatient } from "@/app/actions/patients";
+import { submitPatientSelfRegistration } from "@/app/actions/patients";
 import { useToast } from "@/components/ui/use-toast";
 
 const formSchema = z.object({
@@ -52,9 +52,13 @@ const formSchema = z.object({
   riskFactors: z.string().optional(),
 });
 
-export function PatientForm() {
-  const [consentForm, setConsentForm] = useState<File | null>(null);
-  const [isReviewing, setIsReviewing] = useState(false);
+interface PatientSelfRegistrationFormProps {
+  uniqueId: string;
+}
+
+export function PatientSelfRegistrationForm({
+  uniqueId,
+}: PatientSelfRegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -74,44 +78,22 @@ export function PatientForm() {
     },
   });
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      setConsentForm(e.target.files[0]);
-    }
-  }
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!isReviewing) {
-      setIsReviewing(true);
-      return;
-    }
-
     setIsSubmitting(true);
-    const patientFormData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      if (value) patientFormData.append(key, value);
-    });
-    if (consentForm) {
-      patientFormData.append("consentForm", consentForm);
-    }
-
     try {
-      const result = await registerPatient(patientFormData);
-      if ("error" in result) {
+      const result = await submitPatientSelfRegistration(uniqueId, values);
+      if ("error" in result && result.error) {
         toast({
           title: "Registration Failed",
-          description:
-            typeof result.error === "string"
-              ? result.error
-              : "Failed to register patient",
+          description: result.error.toString(),
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Patient Registered",
-          description: "The patient has been successfully registered.",
+          title: "Registration Submitted",
+          description: "Your registration has been submitted for verification.",
         });
-        router.push("/dashboard/patients");
+        router.push("/patient-self-registration-success");
       }
     } catch (error) {
       toast({
@@ -128,7 +110,7 @@ export function PatientForm() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center text-lvct-purple">
-          Register New Patient
+          Patient Self-Registration
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -142,7 +124,7 @@ export function PatientForm() {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input {...field} readOnly={isReviewing} />
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -155,7 +137,7 @@ export function PatientForm() {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input {...field} readOnly={isReviewing} />
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -169,7 +151,7 @@ export function PatientForm() {
                 <FormItem>
                   <FormLabel>Date of Birth</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} readOnly={isReviewing} />
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,7 +165,7 @@ export function PatientForm() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} readOnly={isReviewing} />
+                      <Input type="email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -196,7 +178,7 @@ export function PatientForm() {
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input type="tel" {...field} readOnly={isReviewing} />
+                      <Input type="tel" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -210,7 +192,7 @@ export function PatientForm() {
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input {...field} readOnly={isReviewing} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -225,7 +207,6 @@ export function PatientForm() {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={isReviewing}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -249,7 +230,7 @@ export function PatientForm() {
                 <FormItem>
                   <FormLabel>Medical History</FormLabel>
                   <FormControl>
-                    <Textarea {...field} readOnly={isReviewing} />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,60 +243,31 @@ export function PatientForm() {
                 <FormItem>
                   <FormLabel>Risk Factors</FormLabel>
                   <FormControl>
-                    <Textarea {...field} readOnly={isReviewing} />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div>
-              <Label htmlFor="consentForm">Consent Form</Label>
-              <Input
-                id="consentForm"
-                name="consentForm"
-                type="file"
-                onChange={handleFileChange}
-                disabled={isReviewing}
-              />
-            </div>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        {isReviewing ? (
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsReviewing(false)}
-            >
-              Edit
-            </Button>
-            <Button
-              type="submit"
-              className="bg-lvct-red hover:bg-lvct-red/90"
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  Registering...
-                </>
-              ) : (
-                "Confirm and Register"
-              )}
-            </Button>
-          </>
-        ) : (
-          <Button
-            type="submit"
-            className="bg-lvct-purple hover:bg-lvct-purple/90"
-            onClick={form.handleSubmit(onSubmit)}
-          >
-            Review
-          </Button>
-        )}
+      <CardFooter>
+        <Button
+          type="submit"
+          className="w-full bg-lvct-red hover:bg-lvct-red/90"
+          onClick={form.handleSubmit(onSubmit)}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            "Submit for Verification"
+          )}
+        </Button>
       </CardFooter>
     </Card>
   );
