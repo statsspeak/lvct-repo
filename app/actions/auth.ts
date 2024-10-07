@@ -7,6 +7,85 @@ import { revalidatePath } from "next/cache";
 import { sendEmail } from "@/lib/email";
 import { auth } from "@/auth";
 
+export async function registerUser(data: {
+  name: string;
+  email: string;
+  password: string;
+  role: "ADMIN" | "STAFF" | "LAB_TECHNICIAN" | "CALL_CENTER_AGENT";
+  profession: string;
+  qualifications: string;
+  phoneNumber: string;
+}) {
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUser) {
+      return { error: "User already exists" };
+    }
+
+    const hashedPassword = await hash(data.password, 10);
+    const verificationToken = crypto.randomUUID();
+
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: hashedPassword,
+        role: data.role,
+        profession: data.profession,
+        qualifications: data.qualifications,
+        phoneNumber: data.phoneNumber,
+        verificationToken,
+      },
+    });
+
+    await sendEmail({
+      to: data.email,
+      subject: "Verify your account for HPV Patient Journey Mapping App",
+      text: `Please verify your account by clicking this link: ${process.env.NEXT_PUBLIC_APP_URL}/verify-account/${verificationToken}`,
+    });
+
+    revalidatePath("/dashboard");
+    return {
+      success: true,
+      message:
+        "Registration successful. Please check your email to verify your account.",
+    };
+  } catch (error) {
+    console.error("Failed to register user", error);
+    return { error: "Failed to register. Please try again later." };
+  }
+}
+export async function verifyAccount(token: string) {
+  try {
+    const user = await prisma.user.findFirst({
+      where: { verificationToken: token },
+    });
+
+    if (!user) {
+      return { error: "Invalid or expired verification token" };
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verificationToken: null,
+        emailVerified: new Date(),
+      },
+    });
+
+    return {
+      success: true,
+      message: "Account verified successfully. You can now log in.",
+    };
+  } catch (error) {
+    console.error("Failed to verify account", error);
+    return { error: "Failed to verify account. Please try again later." };
+  }
+}
+
 const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),

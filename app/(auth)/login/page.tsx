@@ -97,6 +97,12 @@ export default function Login() {
           <Link href="/reset-password-request" className="text-sm text-purple-800 hover:underline">
             Forgot password?
           </Link>
+          <p className="text-sm text-muted-foreground">
+          Don't have an account yet?{" "}
+          <Link href="/register" className="text-lvct-purple hover:underline">
+            Register
+          </Link>
+        </p>
         </CardFooter>
       </Card>
     </div>

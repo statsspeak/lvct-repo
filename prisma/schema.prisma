@@ -8,18 +8,24 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
-  name             String?
-  email            String    @unique
-  password         String?
-  role             Role      @default(STAFF)
-  invitationToken  String?   @unique
-  resetToken       String?   @unique
-  resetTokenExpiry DateTime?
-  failedAttempts   Int       @default(0)
-  lockedUntil      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                String    @id @default(uuid())
+  name              String?
+  email             String    @unique
+  password          String?
+  role              Role      @default(STAFF)
+  invitationToken   String?   @unique
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
+  failedAttempts    Int       @default(0)
+  lockedUntil       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  profession        String?
+  qualifications    String?
+  phoneNumber       String?
+  verificationToken String?   @unique
+  emailVerified     DateTime?
 
   testsCreated       Test[]
   testsUpdated       Test[]          @relation("TestUpdates")
