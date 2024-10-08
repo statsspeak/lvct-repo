@@ -48,10 +48,11 @@ async function main() {
           createdBy: users[1].id, // Staff member creates patients
           address: faker.location.streetAddress(),
           hivStatus: faker.helpers.arrayElement(['POSITIVE', 'NEGATIVE', 'UNKNOWN']),
+          consentName: faker.person.fullName(),
+          consentDate: faker.date.recent(),
         },
       });
-    })
-  );
+    })  );
 
   // Create sample tests
   const tests = await Promise.all(

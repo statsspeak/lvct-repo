@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { StaffPatientRegistrationManagement } from "@/components/StaffPatientRegistrationManagement";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Unauthorized from "@/app/unauthorized/page";
+import PendingSelfRegistrations from "@/components/PendingSelfRegistrations";
 
 export const metadata: Metadata = {
   title: "Patient Registration Management | LVCT Health",
@@ -25,6 +26,7 @@ export default async function PatientRegistrationManagementPage() {
       </CardHeader>
       <CardContent>
         <StaffPatientRegistrationManagement />
+        <PendingSelfRegistrations />
       </CardContent>
     </Card>
   );

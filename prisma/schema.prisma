@@ -69,6 +69,8 @@ model Patient {
   medicalHistory String?
   riskFactors    String?
   consentForm    String?
+  consentName    String
+  consentDate    DateTime
   qrCode         String
   createdBy      String
   createdByUser  User            @relation(fields: [createdBy], references: [id])
@@ -79,8 +81,8 @@ model Patient {
 }
 
 model PatientSelfRegistration {
-  id             String    @id @default(uuid())
-  uniqueId       String    @unique
+  id             String                 @id @default(uuid())
+  uniqueId       String                 @unique
   firstName      String
   lastName       String
   dateOfBirth    String
@@ -90,9 +92,12 @@ model PatientSelfRegistration {
   hivStatus      HIVStatus
   medicalHistory String?
   riskFactors    String?
-  status         SelfRegistrationStatus @default(PENDING)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  consentName    String
+  consentDate    String
+  consent        Boolean
+  status         SelfRegistrationStatus
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
 }
 
 enum SelfRegistrationStatus {

@@ -21,6 +21,8 @@ const patientSchema = z.object({
   hivStatus: z.enum(["POSITIVE", "NEGATIVE", "UNKNOWN"]),
   medicalHistory: z.string().optional(),
   riskFactors: z.string().optional(),
+  consentName: z.string().min(1, "Consent name is required"),
+  consentDate: z.string().min(1, "Consent date is required"),
 });
 
 export async function registerPatient(formData: FormData) {
@@ -43,6 +45,9 @@ export async function registerPatient(formData: FormData) {
     hivStatus: formData.get("hivStatus"),
     medicalHistory: formData.get("medicalHistory"),
     riskFactors: formData.get("riskFactors"),
+    consentName: formData.get("consentName") || "",
+    consentDate:
+      formData.get("consentDate") || new Date().toISOString().split("T")[0],
   });
 
   if (!validatedFields.success) {
@@ -59,6 +64,8 @@ export async function registerPatient(formData: FormData) {
     hivStatus,
     medicalHistory,
     riskFactors,
+    consentName,
+    consentDate,
   } = validatedFields.data;
   const consentForm = formData.get("consentForm") as File | null;
 
@@ -85,6 +92,8 @@ export async function registerPatient(formData: FormData) {
         medicalHistory: medicalHistory || null,
         riskFactors: riskFactors || null,
         consentForm: consentFormUrl,
+        consentName,
+        consentDate: new Date(consentDate),
         qrCode: qrCodeDataUrl,
         createdBy: session.user.id || "",
       },
@@ -109,30 +118,48 @@ const patientSelfRegistrationSchema = z.object({
   hivStatus: z.enum(["POSITIVE", "NEGATIVE", "UNKNOWN"]),
   medicalHistory: z.string().optional(),
   riskFactors: z.string().optional(),
+  consentName: z.string().min(1, "Consent name is required"),
+  consentDate: z.string().min(1, "Consent date is required"),
+  consent: z.boolean().refine((value) => value === true, {
+    message: "You must agree to the consent form to proceed",
+  }),
+  uniqueId: z.string(),
 });
 
 export async function submitPatientSelfRegistration(
-  uniqueId: string,
   data: z.infer<typeof patientSelfRegistrationSchema>
 ) {
+  console.log("Received data:", data); // Log the received data
+
   const validatedFields = patientSelfRegistrationSchema.safeParse(data);
 
   if (!validatedFields.success) {
+    console.error(
+      "Validation error:",
+      validatedFields.error.flatten().fieldErrors
+    );
     return { error: validatedFields.error.flatten().fieldErrors };
   }
 
   try {
-    await prisma.patientSelfRegistration.create({
+    const { uniqueId, ...patientData } = validatedFields.data;
+    console.log("Validated data:", { uniqueId, ...patientData }); // Log the validated data
+
+    const createdRegistration = await prisma.patientSelfRegistration.create({
       data: {
-        ...validatedFields.data,
+        ...patientData,
         uniqueId,
         status: "PENDING",
       },
     });
 
-    return { success: true };
+    console.log("Created registration:", createdRegistration); // Log the created registration
+
+    return { success: true, registration: createdRegistration };
   } catch (error) {
     console.error("Failed to submit patient self-registration:", error);
+    // Log the full error object
+    console.error("Full error object:", JSON.stringify(error, null, 2));
     return { error: "Failed to submit patient self-registration" };
   }
 }
@@ -170,19 +197,25 @@ export async function approvePatientSelfRegistration(id: string) {
       return { error: "Self-registration not found" };
     }
 
+    const patientId = uuidv4();
+    const qrCodeDataUrl = await QRCode.toDataURL(patientId);
+
     const patient = await prisma.patient.create({
       data: {
+        id: patientId,
         firstName: selfRegistration.firstName,
         lastName: selfRegistration.lastName,
         dateOfBirth: new Date(selfRegistration.dateOfBirth),
         email: selfRegistration.email,
         phone: selfRegistration.phone,
         address: selfRegistration.address,
-        hivStatus: selfRegistration.hivStatus,
+        hivStatus: "UNKNOWN",
         medicalHistory: selfRegistration.medicalHistory,
         riskFactors: selfRegistration.riskFactors,
-        qrCode: "", // Add an empty string for qrCode
-        createdByUser: { connect: { id: (session.user as any).id } }, // Use connect to link the user
+        consentName: selfRegistration.consentName,
+        consentDate: new Date(selfRegistration.consentDate),
+        qrCode: qrCodeDataUrl,
+        createdBy: (session.user as any).id,
       },
     });
 
@@ -192,7 +225,7 @@ export async function approvePatientSelfRegistration(id: string) {
     });
 
     revalidatePath("/dashboard/patients");
-    return { success: true, patient };
+    return { success: true, patient, qrCodeDataUrl };
   } catch (error) {
     console.error("Failed to approve patient self-registration:", error);
     return { error: "Failed to approve patient self-registration" };

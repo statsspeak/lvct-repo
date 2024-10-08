@@ -19,7 +19,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,6 +34,7 @@ import {
 import { Icons } from "@/components/ui/icons";
 import { registerPatient } from "@/app/actions/patients";
 import { useToast } from "@/components/ui/use-toast";
+import Image from "next/image";
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -50,12 +50,15 @@ const formSchema = z.object({
   hivStatus: z.enum(["UNKNOWN", "POSITIVE", "NEGATIVE"]),
   medicalHistory: z.string().optional(),
   riskFactors: z.string().optional(),
+  consentName: z.string().min(1, "Consent name is required"),
+  consentDate: z.string().min(1, "Consent date is required"),
 });
 
 export function PatientForm() {
   const [consentForm, setConsentForm] = useState<File | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -71,6 +74,8 @@ export function PatientForm() {
       hivStatus: "UNKNOWN",
       medicalHistory: "",
       riskFactors: "",
+      consentName: "",
+      consentDate: new Date().toISOString().split("T")[0],
     },
   });
 
@@ -106,11 +111,13 @@ export function PatientForm() {
               : "Failed to register patient",
           variant: "destructive",
         });
-      } else {
+      } else if ("qrCodeDataUrl" in result) {
+        setQrCode(result.qrCodeDataUrl);
         toast({
           title: "Patient Registered",
           description: "The patient has been successfully registered.",
         });
+      } else {
         router.push("/dashboard/patients");
       }
     } catch (error) {
@@ -122,6 +129,45 @@ export function PatientForm() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (qrCode) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center text-lvct-purple">
+            Patient Registered Successfully
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p>
+            Please print the QR code and attach it to the patient's test kit.
+          </p>
+          <div className="flex justify-center">
+            <Image
+              src={qrCode}
+              alt="Patient QR Code"
+              width={200}
+              height={200}
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button
+            onClick={() => window.print()}
+            className="bg-lvct-purple hover:bg-lvct-purple/90"
+          >
+            Print QR Code
+          </Button>
+          <Button
+            onClick={() => router.push("/dashboard/patients")}
+            className="bg-lvct-red hover:bg-lvct-red/90"
+          >
+            Back to Patients
+          </Button>
+        </CardFooter>
+      </Card>
+    );
   }
 
   return (
@@ -268,8 +314,38 @@ export function PatientForm() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="consentName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Patient Signature (Full Name)</FormLabel>
+                  <FormControl>
+                    <Input {...field} readOnly={isReviewing} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="consentDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Consent Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} readOnly={isReviewing} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div>
-              <Label htmlFor="consentForm">Consent Form</Label>
+              <Label htmlFor="consentForm">
+                Physical Consent Form (Optional)
+              </Label>
               <Input
                 id="consentForm"
                 name="consentForm"
