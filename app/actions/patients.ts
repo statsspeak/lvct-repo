@@ -294,6 +294,12 @@ export async function updatePatient(id: string, data: Partial<Patient>) {
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
         email: data.email || null,
         phone: data.phone || null,
+        address: data.address,
+        hivStatus: data.hivStatus,
+        medicalHistory: data.medicalHistory || null,
+        riskFactors: data.riskFactors || null,
+        consentName: data.consentName,
+        consentDate: data.consentDate ? new Date(data.consentDate) : undefined,
       },
     });
 

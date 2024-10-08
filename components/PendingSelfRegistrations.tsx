@@ -175,10 +175,10 @@ export default function PendingSelfRegistrations() {
 
   return (
     <>
-      <Card className="max-w-4xl mx-auto">
+      <Card className="max-w-4xl">
         <CardHeader>
           <CardTitle className="text-2xl font-poppins text-lvct-purple">
-            Pending Self-Registrations
+            {/* Pending Self-Registrations */}
           </CardTitle>
         </CardHeader>
         <CardContent>

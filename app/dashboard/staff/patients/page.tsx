@@ -38,7 +38,7 @@ export default async function Patients({
           Registered Patients
         </CardTitle>
         <Button asChild>
-          <Link href="/dashboard/register-patient">
+          <Link href="/dashboard/staff/register-patient">
             <Plus className="mr-2 h-4 w-4" /> Register New Patient
           </Link>
         </Button>
