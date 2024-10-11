@@ -7,7 +7,7 @@ import { Prisma, TestStatus } from "@prisma/client";
 import { addNotification } from "@/lib/notifications";
 
 const testSchema = z.object({
-  patientId: z.string().cuid(),
+  patientId: z.string().uuid(),
   status: z.enum([
     "ISSUED",
     "COLLECTED",

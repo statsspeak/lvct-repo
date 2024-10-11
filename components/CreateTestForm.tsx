@@ -27,7 +27,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 const testSchema = z.object({
-  patientId: z.string().cuid(),
+  patientId: z.string().uuid(),
   status: z.enum(["RECEIVED", "IN_PROGRESS"]),
   collectionDate: z.string().datetime(),
   notes: z.string().optional(),
