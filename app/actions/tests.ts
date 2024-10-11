@@ -40,6 +40,36 @@ export async function getPatients() {
   }
 }
 
+export async function getTestById(testId: string) {
+  const session = await auth();
+  if (
+    !session ||
+    !["STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
+  ) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const test = await prisma.test.findUnique({
+      where: { id: testId },
+      include: {
+        patient: true,
+        createdByUser: true,
+        updatedByUser: true,
+      },
+    });
+
+    if (!test) {
+      return { error: "Test not found" };
+    }
+
+    return { success: true, test };
+  } catch (error) {
+    console.error("Failed to fetch test:", error);
+    return { error: "Failed to fetch test" };
+  }
+}
+
 export async function createTest(formData: FormData) {
   const session = await auth();
   if (
@@ -110,6 +140,28 @@ export async function createTest(formData: FormData) {
       }
     }
     return { error: "Failed to create test. Please try again." };
+  }
+}
+
+export async function deleteTest(testId: string) {
+  const session = await auth();
+  if (
+    !session ||
+    !["STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
+  ) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    await prisma.test.delete({
+      where: { id: testId },
+    });
+
+    revalidatePath("/dashboard/lab-technician/tests");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete test:", error);
+    return { error: "Failed to delete test" };
   }
 }
 

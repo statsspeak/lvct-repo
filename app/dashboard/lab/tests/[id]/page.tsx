@@ -34,8 +34,8 @@ export default async function TestDetailPage({ params }: { params: { id: string 
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Test Details</h1>
-                <Link href="/dashboard/lab">
-                    <Button variant="outline">Back to Lab</Button>
+                <Link href="/dashboard/lab-technician">
+                    <Button variant="outline">Back to lab</Button>
                 </Link>
             </div>
 

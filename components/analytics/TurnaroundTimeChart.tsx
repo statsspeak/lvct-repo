@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import {
   BarChart,
@@ -10,6 +11,13 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 interface TurnaroundTimeProps {
   data: {
@@ -20,28 +28,54 @@ interface TurnaroundTimeProps {
 
 export function TurnaroundTimeChart({ data }: TurnaroundTimeProps) {
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4 text-lvct-purple">
-        Turnaround Time Analysis
-      </h2>
-      <p className="mb-4 text-gray-700">
-        Average Turnaround Time: {data.averageTurnaroundTime.toFixed(2)} days
-      </p>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data.turnaroundTimeDistribution}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-          <XAxis dataKey="range" tick={{ fill: "#333333" }} />
-          <YAxis tick={{ fill: "#333333" }} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "white",
-              border: "1px solid #e0e0e0",
-            }}
-          />
-          <Legend wrapperStyle={{ color: "#333333" }} />
-          <Bar dataKey="count" fill="#dc3545" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Turnaround Time Analysis</CardTitle>
+        <CardDescription>
+          Average Turnaround Time: {data.averageTurnaroundTime.toFixed(2)} days
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data.turnaroundTimeDistribution}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--border))"
+              />
+              <XAxis
+                dataKey="range"
+                tick={{ fill: "hsl(var(--foreground))" }}
+                tickLine={{ stroke: "hsl(var(--border))" }}
+              />
+              <YAxis
+                tick={{ fill: "hsl(var(--foreground))" }}
+                tickLine={{ stroke: "hsl(var(--border))" }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--background))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "var(--radius)",
+                }}
+              />
+              <Legend wrapperStyle={{ color: "hsl(var(--foreground))" }} />
+              <Bar dataKey="count" fill="hsl(var(--primary))" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Distribution Summary</h3>
+          <ul className="space-y-1">
+            {data.turnaroundTimeDistribution.map((item, index) => (
+              <li key={index} className="flex justify-between">
+                <span>{item.range}</span>
+                <span className="font-medium">{item.count} tests</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

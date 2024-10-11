@@ -23,6 +23,9 @@ const navItems = {
   LAB_TECHNICIAN: [
     { href: "/dashboard/lab-technician", label: "Overview" },
     { href: "/dashboard/lab-technician/tests", label: "Manage Tests" },
+    { href: "/dashboard/lab-technician/scan-qr", label: "Scan QR Code" },
+    { href: "/dashboard/lab-technician/record-test", label: "Record New Test" },
+    { href: "/dashboard/lab-technician/analytics", label: "Test Analytics" },
   ],
   CALL_CENTER_AGENT: [
     { href: "/dashboard/call-center-agent", label: "Overview" },
