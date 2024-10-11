@@ -74,12 +74,9 @@ export async function createTest(formData: FormData) {
   const session = await auth();
   if (
     !session ||
-    !session.user ||
-    !session.user.id ||
-    (session.user as any).role !== "LAB_TECHNICIAN" ||
-    (session.user as any).role !== "STAFF"
+    !["STAFF", "LAB_TECHNICIAN"].includes((session.user as any).role)
   ) {
-    return { error: "Unauthorized. Only lab technicians can create tests." };
+    return { error: "Unauthorized,only staff and lab technicians can create tests" };
   }
 
   const validatedFields = testSchema.safeParse({
@@ -113,7 +110,7 @@ export async function createTest(formData: FormData) {
         status,
         collectionDate: new Date(collectionDate),
         notes,
-        createdBy: session.user.id,
+        createdBy: (session.user as any).id,
         receivedDate: status === "RECEIVED" ? new Date() : undefined,
       },
     });
