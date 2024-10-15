@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Spinner } from "@/components/ui/spinner";
+import { ArrowLeft, Calendar } from "lucide-react";
 
 export const metadata = {
   title: "Follow-ups | Call Center Agent Dashboard",
@@ -19,22 +20,34 @@ export default async function FollowUpsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-lvct-purple">Upcoming Follow-ups</h1>
-        {/* <Button asChild>
+        <h1 className="text-3xl font-bold text-primary flex items-center">
+          <Calendar className="mr-2 h-8 w-8" />
+          Upcoming Follow-ups
+        </h1>
+        <Button asChild variant="outline">
           <Link href="/dashboard/call-center-agent/communications">
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Communications
           </Link>
-        </Button> */}
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Follow-ups Overview</CardTitle>
+          <CardTitle className="text-xl font-semibold">
+            Follow-ups Overview
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<LoadingSpinner />}>
+          <Suspense
+            fallback={
+              <div className="flex justify-center items-center h-64">
+                <Spinner size="lg" />
+              </div>
+            }
+          >
             <UpcomingFollowUps />
           </Suspense>
         </CardContent>

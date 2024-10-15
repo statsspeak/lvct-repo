@@ -9,6 +9,7 @@ import { PatientDetails } from "@/components/PatientDetails";
 import { FollowUpList } from "@/components/FollowUpList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FollowUp } from "@/app/types/followUp";
 
 export default async function PatientCommunicationPage({
   params,
@@ -34,18 +35,31 @@ export default async function PatientCommunicationPage({
   const { communications } = communicationsResult;
   const { patient } = patientDetailsResult;
 
-  const followUps = communications
+  const followUps: FollowUp[] = communications
     .filter(
-      (comm): comm is typeof comm & { followUpDate: Date } =>
+      (comm): comm is typeof comm & { followUpDate: string } =>
         comm.followUpDate !== null && new Date(comm.followUpDate) > new Date()
     )
-    .map((comm) => ({ ...comm, patient }));
+    .map((comm) => ({
+      patient: { firstName: patient.firstName, lastName: patient.lastName },
+      test: { id: comm.test.id, status: comm.test.status },
+      outcome: comm.outcome,
+      id: comm.id,
+      patientId: params.patientId,
+      followUpDate: new Date(comm.followUpDate),
+      method: comm.method,
+      notes: comm.notes || null,
+      communicatedByUser: {
+        name: comm.communicatedByUser?.name || null,
+      },
+      createdAt: new Date(comm.createdAt),
+    }));
 
   const safeCommunciations = communications.map((comm) => ({
     ...comm,
     communicatedByUser: {
       ...comm.communicatedByUser,
-      name: comm.communicatedByUser.name || "",
+      name: comm.communicatedByUser?.name || "",
     },
     followUpDate: comm.followUpDate || undefined,
   }));

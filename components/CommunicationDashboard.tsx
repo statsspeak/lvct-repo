@@ -9,8 +9,22 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
 } from "recharts";
 import { getCommunicationStats } from "@/app/actions/communications";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  AlertCircle,
+  Phone,
+  Mail,
+  MessageSquare,
+  RefreshCw,
+  CheckCircle,
+  Clock,
+  BarChart2,
+} from "lucide-react";
 
 interface CommunicationStats {
   totalCommunications: number;
@@ -21,32 +35,75 @@ interface CommunicationStats {
   communicationsOverTime: { date: string; count: number }[];
 }
 
+const methodIcons = {
+  PHONE: <Phone className="h-4 w-4" />,
+  EMAIL: <Mail className="h-4 w-4" />,
+  SMS: <MessageSquare className="h-4 w-4" />,
+};
+
 export function CommunicationDashboard() {
   const [stats, setStats] = useState<CommunicationStats | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
+  const fetchStats = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const result = await getCommunicationStats();
       if ("error" in result) {
-        setError(result.error || "An unknown error occurred");
-      } else {
-        setStats({
-          ...result.stats,
-          communicationsOverTime: result.stats.communicationsOverTime.map(
-            (item) => ({
-              ...item,
-              date: item.date.toISOString(),
-            })
-          ),
-        });
+        throw new Error(result.error);
       }
-    };
+      setStats({
+        ...result.stats,
+        communicationsOverTime: result.stats.communicationsOverTime.map(
+          (item) => ({
+            ...item,
+            date: new Date(item.date).toLocaleDateString(),
+          })
+        ),
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, []);
 
-  if (error) return <div>Error: {error}</div>;
-  if (!stats) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+        <Button
+          onClick={fetchStats}
+          variant="outline"
+          size="sm"
+          className="mt-2"
+        >
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Retry
+        </Button>
+      </Alert>
+    );
+  }
+
+  if (!stats) return null;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -55,6 +112,7 @@ export function CommunicationDashboard() {
           <CardTitle className="text-sm font-medium">
             Total Communications
           </CardTitle>
+          <BarChart2 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.totalCommunications}</div>
@@ -65,6 +123,7 @@ export function CommunicationDashboard() {
           <CardTitle className="text-sm font-medium">
             Successful Communications
           </CardTitle>
+          <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
@@ -77,6 +136,7 @@ export function CommunicationDashboard() {
           <CardTitle className="text-sm font-medium">
             Pending Follow-ups
           </CardTitle>
+          <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{stats.pendingFollowUps}</div>
@@ -85,6 +145,7 @@ export function CommunicationDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+          <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
@@ -100,13 +161,14 @@ export function CommunicationDashboard() {
         <CardHeader>
           <CardTitle>Communications by Method</CardTitle>
         </CardHeader>
-        <CardContent className="h-[200px]">
+        <CardContent className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.communicationsByMethod}>
               <XAxis dataKey="method" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="count" fill="#8884d8" />
+              <Legend />
+              <Bar dataKey="count" fill="hsl(var(--primary))" name="Count" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -115,13 +177,14 @@ export function CommunicationDashboard() {
         <CardHeader>
           <CardTitle>Communications by Outcome</CardTitle>
         </CardHeader>
-        <CardContent className="h-[200px]">
+        <CardContent className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.communicationsByOutcome}>
               <XAxis dataKey="outcome" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="count" fill="#82ca9d" />
+              <Legend />
+              <Bar dataKey="count" fill="hsl(var(--secondary))" name="Count" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -130,13 +193,14 @@ export function CommunicationDashboard() {
         <CardHeader>
           <CardTitle>Communications Over Time</CardTitle>
         </CardHeader>
-        <CardContent className="h-[200px]">
+        <CardContent className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.communicationsOverTime}>
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="count" fill="#ffc658" />
+              <Legend />
+              <Bar dataKey="count" fill="hsl(var(--accent))" name="Count" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

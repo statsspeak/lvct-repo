@@ -8,6 +8,7 @@ import {
   CommunicationOutcome,
   TestStatus,
 } from "@prisma/client";
+import { FollowUp } from "@/app/types/followUp";
 
 const communicationSchema = z.object({
   patientId: z.string().uuid(),
@@ -348,5 +349,127 @@ export async function getCommunicationStats() {
   } catch (error) {
     console.error("Failed to fetch communication stats:", error);
     return { error: "Failed to fetch communication stats" };
+  }
+}
+
+const appointmentSchema = z.object({
+  patientId: z.string().uuid(),
+  date: z.string(),
+  time: z.string(),
+  type: z.string(),
+  notes: z.string().optional(),
+});
+
+export async function scheduleAppointment(
+  data: z.infer<typeof appointmentSchema>
+) {
+  const session = await auth();
+  if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
+    return { error: "Unauthorized" };
+  }
+
+  const validatedFields = appointmentSchema.safeParse(data);
+
+  if (!validatedFields.success) {
+    return { error: validatedFields.error.flatten().fieldErrors };
+  }
+
+  const { patientId, date, time, type, notes } = validatedFields.data;
+
+  try {
+    const appointment = await prisma.appointment.create({
+      data: {
+        patientId,
+        date: new Date(`${date}T${time}`),
+        type,
+        notes,
+        scheduledBy: (session.user as any).id,
+      },
+    });
+
+    revalidatePath("/dashboard/call-center-agent/appointments");
+    return { success: true, appointment };
+  } catch (error) {
+    console.error("Failed to schedule appointment:", error);
+    return { error: "Failed to schedule appointment" };
+  }
+}
+
+export async function getAppointments(date?: string) {
+  const session = await auth();
+  if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const whereClause = date ? { date: new Date(date) } : {};
+    const appointments = await prisma.appointment.findMany({
+      where: whereClause,
+      include: {
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    return { appointments };
+  } catch (error) {
+    console.error("Failed to fetch appointments:", error);
+    return { error: "Failed to fetch appointments" };
+  }
+}
+
+export async function getFollowUpDetails(
+  id: string
+): Promise<FollowUp | { error: string } | null> {
+  const session = await auth();
+  if (!session || (session.user as any).role !== "CALL_CENTER_AGENT") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const followUp = await prisma.communication.findUnique({
+      where: { id },
+      include: {
+        patient: true,
+        test: true,
+        communicatedByUser: true,
+      },
+    });
+
+    if (!followUp) {
+      return null;
+    }
+
+    // Make sure the returned object matches the FollowUp interface
+    return {
+      id: followUp.id,
+      patient: {
+        firstName: followUp.patient.firstName,
+        lastName: followUp.patient.lastName,
+      },
+      test: {
+        id: followUp.test.id,
+        status: followUp.test.status,
+      },
+      outcome: followUp.outcome,
+      patientId: followUp.patientId,
+      followUpDate: followUp.followUpDate ?? new Date(),
+      method: followUp.method,
+      notes: followUp.notes,
+      communicatedByUser: {
+        name: followUp.communicatedByUser?.name || null,
+      },
+      createdAt: followUp.createdAt,
+    };
+  } catch (error) {
+    console.error("Failed to fetch follow-up details:", error);
+    return { error: "Failed to fetch follow-up details" };
   }
 }

@@ -27,13 +27,14 @@ model User {
   verificationToken String?   @unique
   emailVerified     DateTime?
 
-  testsCreated       Test[]
-  testsUpdated       Test[]          @relation("TestUpdates")
-  auditLogs          AuditLog[]
-  patientsRegistered Patient[]
-  communications     Communication[]
-  preference         UserPreference?
-  notifications      Notification[]
+  testsCreated          Test[]
+  testsUpdated          Test[]          @relation("TestUpdates")
+  auditLogs             AuditLog[]
+  patientsRegistered    Patient[]
+  communications        Communication[]
+  preference            UserPreference?
+  notifications         Notification[]
+  scheduledAppointments Appointment[]
 }
 
 enum CommunicationMethod {
@@ -78,6 +79,7 @@ model Patient {
   updatedAt      DateTime        @updatedAt
   tests          Test[]
   communications Communication[]
+  appointments   Appointment[]
 }
 
 model PatientSelfRegistration {
@@ -146,6 +148,19 @@ model Communication {
   communicatedByUser User                 @relation(fields: [communicatedBy], references: [id])
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  date        DateTime
+  type        String
+  notes       String?
+  scheduledBy String
+  scheduler   User     @relation(fields: [scheduledBy], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum TestStatus {

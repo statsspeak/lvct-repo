@@ -34,6 +34,10 @@ const navItems = {
       label: "Communications",
     },
     { href: "/dashboard/call-center-agent/follow-ups", label: "Follow-ups" },
+    {
+      href: "/dashboard/call-center-agent/appointments",
+      label: "Appointments",
+    },
   ],
 } as const;
 
