@@ -146,7 +146,7 @@ export default function PendingSelfRegistrations() {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-muted-foreground">
-            Please print the QR code and attach it to the patient's test kit.
+            Please print the QR code and attach it to the patient&apos;s test kit.
           </p>
           <div className="flex justify-center">
             <Image
@@ -224,7 +224,7 @@ export default function PendingSelfRegistrations() {
                 Review Registration
               </DialogTitle>
               <DialogDescription>
-                Review the details of the patient's self-registration before
+                Review the details of the patient&apos;s self-registration before
                 approval.
               </DialogDescription>
             </DialogHeader>
