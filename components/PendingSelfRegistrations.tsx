@@ -47,7 +47,7 @@ export default function PendingSelfRegistrations() {
 
   useEffect(() => {
     fetchPendingRegistrations();
-  }, []);
+  }, );
 
   async function fetchPendingRegistrations() {
     setIsLoading(true);

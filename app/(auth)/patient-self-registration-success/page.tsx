@@ -30,7 +30,7 @@ export default function PatientSelfRegistrationSuccessPage() {
               will review your information and contact you soon.
             </p>
             <p className="mb-6">
-              If you have any questions, please don't hesitate to contact us.
+              If you have any questions, please don&apos;t hesitate to contact us.
             </p>
             <Button asChild className="w-full bg-lvct-red hover:bg-lvct-red/90">
               <Link href="/">Return to Home</Link>

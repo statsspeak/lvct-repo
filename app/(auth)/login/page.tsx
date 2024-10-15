@@ -98,7 +98,7 @@ export default function Login() {
             Forgot password?
           </Link>
           <p className="text-sm text-muted-foreground">
-          Don't have an account yet?{" "}
+          Don&apos;t have an account yet?{" "}
           <Link href="/register" className="text-lvct-purple hover:underline">
             Register
           </Link>

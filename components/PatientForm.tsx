@@ -141,7 +141,7 @@ export function PatientForm() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p>
-            Please print the QR code and attach it to the patient's test kit.
+            Please print the QR code and attach it to the patient&apos;s test kit.
           </p>
           <div className="flex justify-center">
             <Image
