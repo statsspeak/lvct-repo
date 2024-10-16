@@ -257,6 +257,7 @@ export default function PendingSelfRegistrations() {
               >
                 Approve
               </Button>
+              
             </DialogFooter>
           </DialogContent>
         </Dialog>
