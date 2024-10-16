@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { MailIcon } from "lucide-react";
 
@@ -40,6 +42,14 @@ export function ContactAdminCard({ adminEmail }: ContactAdminCardProps) {
           Contact Admin
         </Button>
       </CardContent>
+      <CardFooter>
+        <p className="text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link href="/login" className="text-primary hover:underline">
+            Log in here
+          </Link>
+        </p>
+      </CardFooter>
     </>
   );
 }
