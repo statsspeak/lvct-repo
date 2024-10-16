@@ -31,6 +31,14 @@ export default async function ViewTestsPage({
 
     const { tests, pagination } = testsResult;
 
+    const onSearch = (searchTerm: string) => {
+        // Implement search functionality
+    };
+
+    const onPageChange = (newPage: number) => {
+        // Implement page change functionality
+    };
+
     return (
         <div className="space-y-6">
             <h1 className="text-3xl font-bold">View Tests</h1>
@@ -38,6 +46,8 @@ export default async function ViewTestsPage({
                 initialTests={tests}
                 updateTestStatus={updateTestStatus}
                 pagination={pagination}
+                onSearch={onSearch}
+                onPageChange={onPageChange}
             />
         </div>
     );
