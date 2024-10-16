@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PatientDetailsForm } from "@/components/PatientDetailsForm";
 import Image from "next/image";
 // Import the skeleton if you need it in this file
-// import { PatientPageSkeleton } from '@/components/PatientPageSkeleton';
+import { PatientPageSkeleton } from '@/components/PatientPageSkeleton';
 
 interface Patient {
   id: string;
