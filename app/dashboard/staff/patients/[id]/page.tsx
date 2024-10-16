@@ -6,6 +6,8 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PatientDetailsForm } from "@/components/PatientDetailsForm";
 import Image from "next/image";
+// Import the skeleton if you need it in this file
+import { PatientPageSkeleton } from '@/components/PatientPageSkeleton';
 
 interface Patient {
   id: string;
@@ -117,21 +119,5 @@ export default async function PatientPage({
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-export function PatientPageSkeleton() {
-  return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <Skeleton className="h-8 w-3/4" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-      </CardContent>
-    </Card>
   );
 }
