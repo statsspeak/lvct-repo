@@ -52,6 +52,9 @@ const formSchema = z.object({
   riskFactors: z.string().optional(),
   consentName: z.string().min(1, "Consent name is required"),
   consentDate: z.string().min(1, "Consent date is required"),
+  consentForm: z
+    .instanceof(File)
+    .refine((file) => file.size > 0, "Consent form is required"),
 });
 
 export default function RegisterPatient() {
@@ -80,8 +83,9 @@ export default function RegisterPatient() {
   });
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
+    if (e.target.files && e.target.files[0]) {
       setConsentForm(e.target.files[0]);
+      form.setValue("consentForm", e.target.files[0]);
     }
   }
 
@@ -91,14 +95,21 @@ export default function RegisterPatient() {
       return;
     }
 
+    if (!consentForm) {
+      toast({
+        title: "Consent Form Required",
+        description: "Please upload a consent form before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     const patientFormData = new FormData();
     Object.entries(values).forEach(([key, value]) => {
       if (value) patientFormData.append(key, value);
     });
-    if (consentForm) {
-      patientFormData.append("consentForm", consentForm);
-    }
+    patientFormData.append("consentForm", consentForm);
 
     try {
       const result = await registerPatient(patientFormData);
@@ -141,7 +152,8 @@ export default function RegisterPatient() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p>
-            Please print the QR code and attach it to the patient&apos;s test kit.
+            Please print the QR code and attach it to the patient&apos;s test
+            kit.
           </p>
           <div className="flex justify-center">
             <Image
@@ -327,7 +339,7 @@ export default function RegisterPatient() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="consentDate"
@@ -341,16 +353,24 @@ export default function RegisterPatient() {
                 </FormItem>
               )}
             />
-            <div>
-              <Label htmlFor="consentForm">Consent Form</Label>
-              <Input
-                id="consentForm"
-                name="consentForm"
-                type="file"
-                onChange={handleFileChange}
-                disabled={isReviewing}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="consentForm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Consent Form (Required)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      onChange={handleFileChange}
+                      disabled={isReviewing}
+                      accept=".pdf,.doc,.docx"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </form>
         </Form>
       </CardContent>

@@ -8,6 +8,14 @@ import QRCode from "qrcode";
 import { v4 as uuidv4 } from "uuid";
 import { uploadFile } from "@/lib/fileUpload";
 import { Patient } from "@prisma/client";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const patientSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -45,9 +53,8 @@ export async function registerPatient(formData: FormData) {
     hivStatus: formData.get("hivStatus"),
     medicalHistory: formData.get("medicalHistory"),
     riskFactors: formData.get("riskFactors"),
-    consentName: formData.get("consentName") || "",
-    consentDate:
-      formData.get("consentDate") || new Date().toISOString().split("T")[0],
+    consentName: formData.get("consentName"),
+    consentDate: formData.get("consentDate"),
   });
 
   if (!validatedFields.success) {
@@ -67,14 +74,29 @@ export async function registerPatient(formData: FormData) {
     consentName,
     consentDate,
   } = validatedFields.data;
+
   const consentForm = formData.get("consentForm") as File | null;
 
-  try {
-    let consentFormUrl = null;
+  if (!consentForm) {
+    return { error: "Consent form is required" };
+  }
 
-    if (consentForm) {
-      consentFormUrl = await uploadFile(consentForm);
-    }
+  try {
+    // Upload consent form to Cloudinary
+    const consentFormBuffer = await consentForm.arrayBuffer();
+    const consentFormBase64 = Buffer.from(consentFormBuffer).toString("base64");
+    const cloudinaryResponse = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        `data:${consentForm.type};base64,${consentFormBase64}`,
+        { folder: "consent_forms" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+    });
+
+    const consentFormUrl = (cloudinaryResponse as any).secure_url;
 
     const patientId = uuidv4();
     const qrCodeDataUrl = await QRCode.toDataURL(patientId);
@@ -106,6 +128,7 @@ export async function registerPatient(formData: FormData) {
     return { error: "Failed to register patient" };
   }
 }
+
 const patientSelfRegistrationSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),

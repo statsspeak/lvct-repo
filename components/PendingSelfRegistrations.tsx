@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@/app/actions/patients";
 import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, RefreshCw } from "lucide-react";
 
 interface PendingRegistration {
   id: string;
@@ -42,15 +42,13 @@ export default function PendingSelfRegistrations() {
   const [selectedRegistration, setSelectedRegistration] =
     useState<PendingRegistration | null>(null);
   const [approvedQRCode, setApprovedQRCode] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchPendingRegistrations();
-  }, );
-
-  async function fetchPendingRegistrations() {
+  const fetchPendingRegistrations = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const result = await getPatientSelfRegistrations();
       if ("error" in result) {
@@ -58,6 +56,11 @@ export default function PendingSelfRegistrations() {
       }
       setPendingRegistrations(result.selfRegistrations);
     } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch pending registrations"
+      );
       toast({
         title: "Error",
         description:
@@ -69,7 +72,11 @@ export default function PendingSelfRegistrations() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchPendingRegistrations();
+  }, [fetchPendingRegistrations]);
 
   async function handleApprove(registrationId: string) {
     setIsLoading(true);
@@ -146,7 +153,8 @@ export default function PendingSelfRegistrations() {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-muted-foreground">
-            Please print the QR code and attach it to the patient&apos;s test kit.
+            Please print the QR code and attach it to the patient&apos;s test
+            kit.
           </p>
           <div className="flex justify-center">
             <Image
@@ -177,15 +185,30 @@ export default function PendingSelfRegistrations() {
     <>
       <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-poppins text-lvct-purple">
-            {/* Pending Self-Registrations */}
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-poppins text-lvct-purple">
+              Pending Self-Registrations
+            </CardTitle>
+            <Button
+              onClick={fetchPendingRegistrations}
+              disabled={isLoading}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center items-center h-32">
               <Loader2 className="w-8 h-8 animate-spin text-lvct-purple" />
             </div>
+          ) : error ? (
+            <p className="text-center text-red-500">{error}</p>
           ) : pendingRegistrations.length === 0 ? (
             <p className="text-center text-muted-foreground">
               No pending registrations
@@ -224,8 +247,8 @@ export default function PendingSelfRegistrations() {
                 Review Registration
               </DialogTitle>
               <DialogDescription>
-                Review the details of the patient&apos;s self-registration before
-                approval.
+                Review the details of the patient&apos;s self-registration
+                before approval.
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="flex-grow px-6">
@@ -257,7 +280,6 @@ export default function PendingSelfRegistrations() {
               >
                 Approve
               </Button>
-              
             </DialogFooter>
           </DialogContent>
         </Dialog>

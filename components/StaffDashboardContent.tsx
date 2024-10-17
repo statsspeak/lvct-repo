@@ -116,7 +116,7 @@ export function StaffDashboardContent({ userRole }: { userRole: string }) {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-semibold text-lvct-purple">
-            Pending Self-Registrations
+            Self-Registrations
           </CardTitle>
         </CardHeader>
         <CardContent>
