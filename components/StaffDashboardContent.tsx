@@ -17,29 +17,63 @@ interface SSEData {
 export function StaffDashboardContent({ userRole }: { userRole: string }) {
   const [data, setData] = useState<SSEData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [usePolling, setUsePolling] = useState(false);
 
   useEffect(() => {
-    const eventSource = new EventSource(`/api/sse?role=${userRole}`);
+    let eventSource: EventSource | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-    eventSource.onmessage = (event) => {
+    const fetchData = async () => {
       try {
-        const parsedData = JSON.parse(event.data);
-        setData(parsedData);
+        const response = await fetch(`/api/dashboard-data?role=${userRole}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const jsonData = await response.json();
+        setData(jsonData);
+        setError(null);
       } catch (err) {
-        console.error("Error parsing SSE data:", err);
+        console.error("Error fetching data:", err);
+        setError("Failed to fetch data");
       }
     };
 
-    eventSource.onerror = (err) => {
-      console.error("SSE error:", err);
-      setError("Failed to connect to server");
-      eventSource.close();
+    const setupSSE = () => {
+      eventSource = new EventSource(`/api/sse?role=${userRole}`);
+
+      eventSource.onmessage = (event) => {
+        try {
+          const parsedData = JSON.parse(event.data);
+          setData(parsedData);
+          setError(null);
+        } catch (err) {
+          console.error("Error parsing SSE data:", err);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error("SSE error:", err);
+        eventSource?.close();
+        setUsePolling(true);
+      };
     };
 
+    if (!usePolling) {
+      setupSSE();
+    } else {
+      fetchData();
+      pollInterval = setInterval(fetchData, 5000); // Poll every 5 seconds
+    }
+
     return () => {
-      eventSource.close();
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
     };
-  }, [userRole]);
+  }, [userRole, usePolling]);
 
   if (error) {
     return <ErrorMessage message={error} />;
@@ -126,5 +160,3 @@ export function StaffDashboardContent({ userRole }: { userRole: string }) {
     </div>
   );
 }
-
-
