@@ -58,6 +58,7 @@ export function AppointmentCalendar() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAppointment, setNewAppointment] = useState({
     patientId: "",
+    date: "",
     time: "",
     type: "",
     notes: "",
@@ -71,7 +72,15 @@ export function AppointmentCalendar() {
       try {
         const result = await getAppointments(date.toISOString().split("T")[0]);
         if ("appointments" in result && Array.isArray(result.appointments)) {
-          setAppointments(result.appointments);
+          const formattedAppointments: Appointment[] = result.appointments.map(
+            (app) => ({
+              ...app,
+              date: new Date(app.date),
+              createdAt: new Date(app.createdAt),
+              updatedAt: new Date(app.updatedAt),
+            })
+          );
+          setAppointments(formattedAppointments);
         } else {
           throw new Error("Failed to fetch appointments");
         }
@@ -97,16 +106,20 @@ export function AppointmentCalendar() {
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date);
+      setNewAppointment((prev) => ({
+        ...prev,
+        date: date.toISOString().split("T")[0],
+      }));
     }
   };
 
   const handleScheduleAppointment = async () => {
-    if (!selectedDate) return;
+    if (!newAppointment.date || !newAppointment.time) return;
     setLoading(true);
     try {
       const result = await scheduleAppointment({
         ...newAppointment,
-        date: selectedDate.toISOString().split("T")[0],
+        date: `${newAppointment.date}T${newAppointment.time}:00`,
       });
       if ("success" in result) {
         toast({
@@ -114,7 +127,7 @@ export function AppointmentCalendar() {
           description: "The appointment has been successfully scheduled.",
         });
         setIsDialogOpen(false);
-        fetchAppointments(selectedDate);
+        fetchAppointments(new Date(newAppointment.date));
       } else {
         throw new Error(
           result.error ? result.error.toString() : "An unknown error occurred"
@@ -178,6 +191,20 @@ export function AppointmentCalendar() {
                         setNewAppointment({
                           ...newAppointment,
                           patientId: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="date">Date</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={newAppointment.date}
+                      onChange={(e) =>
+                        setNewAppointment({
+                          ...newAppointment,
+                          date: e.target.value,
                         })
                       }
                     />

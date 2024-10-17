@@ -402,7 +402,21 @@ export async function getAppointments(date?: string) {
   }
 
   try {
-    const whereClause = date ? { date: new Date(date) } : {};
+    let whereClause = {};
+    if (date) {
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+
+      whereClause = {
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      };
+    }
+
     const appointments = await prisma.appointment.findMany({
       where: whereClause,
       include: {
