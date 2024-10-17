@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { Spinner } from "@/components/ui/spinner";
 import { ErrorMessage } from "@/components/ErrorMessage";
 import { Icons } from "@/components/ui/icons";
 import PendingSelfRegistrations from "./PendingSelfRegistrations";
@@ -80,7 +81,7 @@ export function StaffDashboardContent({ userRole }: { userRole: string }) {
   }
 
   if (!data) {
-    return <LoadingSpinner />;
+    return <Spinner size="lg" />;
   }
 
   return (
